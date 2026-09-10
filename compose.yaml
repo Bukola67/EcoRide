@@ -1,0 +1,93 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ecoride_app
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    environment:
+      APP_ENV: dev
+      APP_DEBUG: 1
+      DATABASE_URL: "mysql://ecoride_user:ecoride_password@mysql:3306/ecoride?serverVersion=8.0&charset=utf8mb4"
+      MONGODB_URL: "mongodb://ecoride_mongo:ecoride_mongo_password@mongo:27017"
+      MONGODB_DB: "ecoride"
+      MAILER_DSN: "smtp://mailpit:1025"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      mongo:
+        condition: service_started
+
+  nginx:
+    image: nginx:alpine
+    container_name: ecoride_nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www/html:ro
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+
+  mysql:
+    image: mysql:8.0
+    container_name: ecoride_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ecoride
+      MYSQL_USER: ecoride_user
+      MYSQL_PASSWORD: ecoride_password
+      MYSQL_ROOT_PASSWORD: root_password_change_me
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot_password_change_me"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  mongo:
+    image: mongo:7
+    container_name: ecoride_mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ecoride_mongo
+      MONGO_INITDB_ROOT_PASSWORD: ecoride_mongo_password
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: ecoride_mailpit
+    ports:
+      - "8025:8025"
+      - "1026:1025"
+
+###> doctrine/mongodb-odm-bundle ###
+  mongodb:
+    # In production, you may want to use a managed database service
+    image: mongodb/mongodb-atlas-local:latest
+    environment:
+      - MONGODB_INITDB_DATABASE=${MONGODB_DB:-app}
+      # You should definitely set a root username and password in production
+      - MONGODB_INITDB_ROOT_USERNAME=${MONGODB_USERNAME:-}
+      - MONGODB_INITDB_ROOT_PASSWORD=${MONGODB_PASSWORD:-}
+    volumes:
+      - mongodb_data:/data/db:rw
+      # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
+      # - ./docker/mongodb/data:/data/db:rw
+###< doctrine/mongodb-odm-bundle ###
+
+volumes:
+  mysql_data:
+  mongo_data:
+###> doctrine/mongodb-odm-bundle ###
+  mongodb_data:
+###< doctrine/mongodb-odm-bundle ###
