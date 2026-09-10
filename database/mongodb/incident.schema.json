@@ -1,0 +1,68 @@
+{
+  "$jsonSchema": {
+    "bsonType": "object",
+    "title": "Incident",
+    "required": [
+      "carpool_id",
+      "booking_id",
+      "passenger_id",
+      "driver_id",
+      "departure",
+      "arrival",
+      "departure_at",
+      "arrival_at",
+      "status",
+      "created_at"
+    ],
+    "properties": {
+      "_id": {
+        "bsonType": "objectId"
+      },
+      "carpool_id": {
+        "bsonType": "int",
+        "description": "Reference to carpool.id (MySQL)"
+      },
+      "booking_id": {
+        "bsonType": "int",
+        "description": "Reference to booking.id (MySQL)"
+      },
+      "passenger_id": {
+        "bsonType": "int",
+        "description": "Reference to user.id (MySQL) - passenger involved"
+      },
+      "driver_id": {
+        "bsonType": "int",
+        "description": "Reference to user.id (MySQL) - driver involved"
+      },
+      "departure": {
+        "bsonType": "string",
+        "description": "Departure city/address of the ride"
+      },
+      "arrival": {
+        "bsonType": "string",
+        "description": "Arrival city/address of the ride"
+      },
+      "departure_at": {
+        "bsonType": "date"
+      },
+      "arrival_at": {
+        "bsonType": "date"
+      },
+      "comment": {
+        "bsonType": "string",
+        "description": "Passenger's comment explaining the incident"
+      },
+      "status": {
+        "bsonType": "string",
+        "enum": ["OPEN", "IN_PROGRESS", "RESOLVED"],
+        "description": "Handling status by an employee"
+      },
+      "created_at": {
+        "bsonType": "date"
+      },
+      "updated_at": {
+        "bsonType": "date"
+      }
+    }
+  }
+}
