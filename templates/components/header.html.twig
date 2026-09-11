@@ -1,0 +1,24 @@
+<header class="site-header">
+    <div class="container site-header__inner">
+        <a class="brand" href="{{ path('app_home') }}" aria-label="EcoRide - Accueil">
+            <img
+                class="brand__logo"
+                src="{{ asset('images/logo-ecoride.png') }}"
+                alt="EcoRide, le covoiturage français écologique"
+            >
+        </a>
+
+        <nav class="site-nav" aria-label="Navigation principale">
+            <a href="{{ path('app_home') }}">Accueil</a>
+            <a href="{{ path('app_carpool_index') }}">Covoiturages</a>
+            <a href="{{ path('app_contact') }}">Contact</a>
+
+            {% if app.user %}
+                <a href="{{ path('app_logout') }}">Déconnexion</a>
+            {% else %}
+                <a href="{{ path('app_login') }}">Connexion</a>
+                <a class="btn btn-primary" href="{{ path('app_register') }}">Inscription</a>
+            {% endif %}
+        </nav>
+    </div>
+</header>

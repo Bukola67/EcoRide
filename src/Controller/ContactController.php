@@ -6,13 +6,11 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-final class HomeController extends AbstractController
+final class ContactController extends AbstractController
 {
-    #[Route('/', name: 'app_home', methods: ['GET'])]
+    #[Route('/contact', name: 'app_contact', methods: ['GET'])]
     public function index(): Response
     {
-        return $this->render('home/index.html.twig', [
-            'minDate' => (new \DateTimeImmutable())->format('Y-m-d'),
-        ]);
+        return $this->render('contact/index.html.twig');
     }
 }
