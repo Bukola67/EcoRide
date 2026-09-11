@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil | EcoRide{% endblock %}
+
+{% block body %}
+    <h1>Bienvenue sur EcoRide</h1>
+    <p>La plateforme de covoiturage écologique.</p>
+
+    {% if app.user %}
+        <p>Bonjour {{ app.user.username }}.</p>
+    {% else %}
+        <a href="{{ path('app_register') }}">Créer un compte</a>
+        <a href="{{ path('app_login') }}">Se connecter</a>
+    {% endif %}
+{% endblock %}

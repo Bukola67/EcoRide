@@ -70,6 +70,19 @@ services:
       - "8025:8025"
       - "1026:1025"
 
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: ecoride_phpmyadmin
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+
 ###> doctrine/mongodb-odm-bundle ###
   mongodb:
     # In production, you may want to use a managed database service

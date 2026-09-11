@@ -7,11 +7,13 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
+#[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -38,19 +40,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $username = null;
 
     #[ORM\Column]
-    private ?int $credits = null;
+    private ?int $credits = 20;
 
     #[ORM\Column]
-    private ?bool $isDriver = null;
+    private ?bool $isDriver = false;
 
     #[ORM\Column]
-    private ?bool $isPassenger = null;
+    private ?bool $isPassenger = true;
 
     #[ORM\Column]
-    private ?bool $acceptsSmokers = null;
+    private ?bool $acceptsSmokers = false;
 
     #[ORM\Column]
-    private ?bool $acceptsPets = null;
+    private ?bool $acceptsPets = true;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $customPreferences = null;
@@ -59,13 +61,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $profilePicture = null;
 
     #[ORM\Column]
-    private ?bool $isActive = null;
+    private ?bool $isActive = true;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
+    
 
     /**
      * @var Collection<int, Vehicle>
@@ -96,6 +99,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     #[ORM\OneToMany(targetEntity: CreditTransaction::class, mappedBy: 'user')]
     private Collection $creditTransactions;
+
+    #[ORM\Column]
+    private bool $isVerified = false;
 
     public function __construct()
     {
@@ -459,6 +465,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $creditTransaction->setUser(null);
             }
         }
+
+        return $this;
+    }
+
+    public function isVerified(): bool
+    {
+        return $this->isVerified;
+    }
+
+    public function setIsVerified(bool $isVerified): static
+    {
+        $this->isVerified = $isVerified;
 
         return $this;
     }
