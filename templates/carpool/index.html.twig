@@ -1,43 +1,196 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Covoiturages | EcoRide{% endblock %}
+{% block title %}Rechercher un covoiturage | EcoRide{% endblock %}
 
 {% block body %}
-    <main class="container">
-        <section class="hero">
-            <div class="hero__content">
-                <h1>Trouvez votre covoiturage</h1>
-                <p>Indiquez votre ville de départ, votre destination et votre date de voyage.</p>
+    <section class="hero">
+        <div class="container hero__content">
+            <p class="eyebrow">Covoiturages EcoRide</p>
+            <h1>Trouvez votre prochain trajet</h1>
+            <p class="lead">
+                Recherchez un itinéraire selon vos villes de départ et d’arrivée,
+                ainsi que votre date de voyage.
+            </p>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="search-panel">
+                <form class="search-form" method="get" action="{{ path('app_carpool_index') }}">
+                    <div class="form-group">
+                        <label for="departure">Ville de départ</label>
+                        <input
+                            id="departure"
+                            name="departure"
+                            type="text"
+                            value="{{ departure }}"
+                            placeholder="Ex. Paris"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="arrival">Ville d’arrivée</label>
+                        <input
+                            id="arrival"
+                            name="arrival"
+                            type="text"
+                            value="{{ arrival }}"
+                            placeholder="Ex. Lyon"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="date">Date de départ</label>
+                        <input
+                            id="date"
+                            name="date"
+                            type="date"
+                            value="{{ searchDate ? searchDate|date('Y-m-d') : '' }}"
+                            min="{{ minDate }}"
+                            required
+                        >
+                    </div>
+
+                    <button class="btn btn-primary search-form__submit" type="submit">
+                        Rechercher
+                    </button>
+                </form>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <section class="search-panel" aria-labelledby="search-title">
-            <h2 id="search-title">Rechercher un trajet</h2>
-
-            <form class="search-form" method="get" action="{{ path('app_carpool_index') }}">
-                <div class="form-group">
-                    <label for="departure">Ville de départ</label>
-                    <input id="departure" name="departure" type="text" required>
+    <section class="section">
+        <div class="container">
+            {% if not hasSearched %}
+                <div class="alert alert-info">
+                    Renseignez un départ, une arrivée et une date pour afficher les covoiturages disponibles.
                 </div>
 
-                <div class="form-group">
-                    <label for="arrival">Ville d’arrivée</label>
-                    <input id="arrival" name="arrival" type="text" required>
+            {% elseif searchError %}
+                <div class="alert alert-danger" role="alert">
+                    {{ searchError }}
                 </div>
 
-                <div class="form-group">
-                    <label for="date">Date</label>
-                    <input id="date" name="date" type="date" required>
+            {% elseif carpools is not empty %}
+                <header class="section__header">
+                    <p class="eyebrow">Résultats</p>
+                    <h2>
+                        {{ carpools|length }}
+                        trajet{{ carpools|length > 1 ? 's' : '' }}
+                        disponible{{ carpools|length > 1 ? 's' : '' }}
+                    </h2>
+                    <p>
+                        De {{ departure }} à {{ arrival }},
+                        le {{ searchDate|date('d/m/Y') }}.
+                    </p>
+                </header>
+
+                <div class="cards-grid">
+                    {% for carpool in carpools %}
+                        <article class="card carpool-card">
+                            <div class="carpool-card__top">
+                                <div class="driver-summary">
+                                    {% if carpool.driver.profilePicture %}
+                                        <img
+                                            class="driver-summary__photo"
+                                            src="{{ asset('images/profiles/' ~ carpool.driver.profilePicture) }}"
+                                            alt="Photo de profil de {{ carpool.driver.username }}"
+                                        >
+                                    {% else %}
+                                <div
+                                    class="driver-summary__placeholder"
+                                    aria-hidden="true"
+                                >
+                                    {{ carpool.driver.username|first|upper }}
+                                </div>
+                            {% endif %}
+
+                            <div>
+                                <p class="carpool-card__label">Chauffeur</p>
+                                <h3>{{ carpool.driver.username }}</h3>
+
+                                <p class="driver-summary__rating">
+                                    <span aria-hidden="true">★</span>
+                                    Nouvelle conductrice / nouveau conducteur
+                                </p>
+                            </div>
+                        </div>
+
+                                {% if carpool.vehicle.energyType|lower == 'electric' %}
+                                    <span class="badge badge-eco">
+                                        <span aria-hidden="true">🌿</span>
+                                        Écologique
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <dl class="carpool-card__details">
+                                <div>
+                                    <dt>Départ</dt>
+                                    <dd>{{ carpool.departureAt|date('d/m/Y à H:i') }}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Arrivée</dt>
+                                    <dd>{{ carpool.arrivalAt|date('H:i') }}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Places restantes</dt>
+                                    <dd>{{ carpool.remainingSeatCount }}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Prix</dt>
+                                    <dd>{{ carpool.creditCostPerPassenger }} crédits</dd>
+                                </div>
+                            </dl>
+
+                            <a class="btn btn-outline" href="#">
+                                Voir le détail
+                            </a>
+                        </article>
+                    {% endfor %}
                 </div>
 
-                <button class="btn btn-primary" type="submit">
-                    Rechercher
-                </button>
-            </form>
-        </section>
+            {% else %}
+                <div class="alert alert-warning">
+                    Aucun trajet disponible de {{ departure }} à {{ arrival }}
+                    le {{ searchDate|date('d/m/Y') }}.
+                </div>
 
-        <section class="container" style="padding: 2rem 0;">
-            <p>Aucun covoiturage n’est affiché avant une recherche.</p>
-        </section>
-    </main>
+                {% if alternativeCarpool %}
+                    <article class="card alternative-card">
+                        <p class="eyebrow">Date alternative proposée</p>
+                        <h2>
+                            Un trajet est disponible le
+                            {{ alternativeCarpool.departureAt|date('d/m/Y') }}
+                        </h2>
+
+                        <p>
+                            Départ à {{ alternativeCarpool.departureAt|date('H:i') }},
+                            arrivée à {{ alternativeCarpool.arrivalAt|date('H:i') }},
+                            avec {{ alternativeCarpool.remainingSeatCount }}
+                            place{{ alternativeCarpool.remainingSeatCount > 1 ? 's' : '' }}
+                            restante{{ alternativeCarpool.remainingSeatCount > 1 ? 's' : '' }}.
+                        </p>
+
+                        <a
+                            class="btn btn-primary"
+                            href="{{ path('app_carpool_index', {
+                                departure: departure,
+                                arrival: arrival,
+                                date: alternativeCarpool.departureAt|date('Y-m-d')
+                            }) }}"
+                        >
+                            Voir les trajets du {{ alternativeCarpool.departureAt|date('d/m/Y') }}
+                        </a>
+                    </article>
+                {% endif %}
+            {% endif %}
+        </div>
+    </section>
 {% endblock %}

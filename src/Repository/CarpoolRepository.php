@@ -6,9 +6,6 @@ use App\Entity\Carpool;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<Carpool>
- */
 class CarpoolRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -16,28 +13,66 @@ class CarpoolRepository extends ServiceEntityRepository
         parent::__construct($registry, Carpool::class);
     }
 
-    //    /**
-    //     * @return Carpool[] Returns an array of Carpool objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('c.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /**
+     * Retourne les covoiturages disponibles pour une date civile précise.
+     *
+     * @return Carpool[]
+     */
+    public function findAvailableForSearch(
+        string $departureCity,
+        string $arrivalCity,
+        \DateTimeImmutable $date
+    ): array {
+        $startOfDay = $date->setTime(0, 0);
+        $endOfDay = $date->setTime(23, 59, 59);
 
-    //    public function findOneBySomeField($value): ?Carpool
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        return $this->createQueryBuilder('c')
+            ->innerJoin('c.vehicle', 'v')
+            ->addSelect('v')
+            ->innerJoin('c.driver', 'd')
+            ->addSelect('d')
+            ->andWhere('LOWER(c.departureCity) = LOWER(:departureCity)')
+            ->andWhere('LOWER(c.arrivalCity) = LOWER(:arrivalCity)')
+            ->andWhere('c.departureAt BETWEEN :startOfDay AND :endOfDay')
+            ->andWhere('c.remainingSeatCount > 0')
+            ->andWhere('c.status != :cancelledStatus')
+            ->setParameter('departureCity', trim($departureCity))
+            ->setParameter('arrivalCity', trim($arrivalCity))
+            ->setParameter('startOfDay', $startOfDay)
+            ->setParameter('endOfDay', $endOfDay)
+            ->setParameter('cancelledStatus', 'CANCELLED')
+            ->orderBy('c.departureAt', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Retourne le tout premier trajet futur disponible pour le même itinéraire.
+     */
+    public function findNextAvailableForRoute(
+        string $departureCity,
+        string $arrivalCity,
+        \DateTimeImmutable $afterDate
+    ): ?Carpool {
+        $afterDate = $afterDate->setTime(23, 59, 59);
+
+        return $this->createQueryBuilder('c')
+            ->innerJoin('c.vehicle', 'v')
+            ->addSelect('v')
+            ->innerJoin('c.driver', 'd')
+            ->addSelect('d')
+            ->andWhere('LOWER(c.departureCity) = LOWER(:departureCity)')
+            ->andWhere('LOWER(c.arrivalCity) = LOWER(:arrivalCity)')
+            ->andWhere('c.departureAt > :afterDate')
+            ->andWhere('c.remainingSeatCount > 0')
+            ->andWhere('c.status != :cancelledStatus')
+            ->setParameter('departureCity', trim($departureCity))
+            ->setParameter('arrivalCity', trim($arrivalCity))
+            ->setParameter('afterDate', $afterDate)
+            ->setParameter('cancelledStatus', 'CANCELLED')
+            ->orderBy('c.departureAt', 'ASC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }
