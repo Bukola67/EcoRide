@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes véhicules | EcoRide{% endblock %}
+
+{% block body %}
+    <main class="container">
+        <header class="section__header">
+            <p class="eyebrow">Espace utilisateur</p>
+            <h1>Mes véhicules</h1>
+            <p>
+                <a class="btn btn-primary" href="{{ path('app_vehicle_new') }}">
+                    Ajouter un véhicule
+                </a>
+            </p>
+        </header>
+
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endfor %}
+
+        {% if vehicles|length == 0 %}
+            <div class="alert alert-info">
+                Vous n’avez aucun véhicule enregistré.
+            </div>
+        {% else %}
+            <div class="cards-grid">
+                {% for vehicle in vehicles %}
+                    <article class="card">
+                        <h2>{{ vehicle.model }}</h2>
+                        <p>
+                            Plaque : {{ vehicle.registrationNumber }}<br>
+                            Couleur : {{ vehicle.color ?: 'N/A' }}<br>
+                            Énergie : {{ vehicle.energyType }}<br>
+                            Places : {{ vehicle.seatCount }}
+                        </p>
+
+                        <p>
+                            <a class="btn btn-outline" href="{{ path('app_vehicle_edit', { id: vehicle.id }) }}">
+                                Modifier
+                            </a>
+
+                            <form
+                                method="post"
+                                action="{{ path('app_vehicle_delete', { id: vehicle.id }) }}"
+                                style="display:inline;"
+                                onsubmit="return confirm('Supprimer ce véhicule ?')"
+                            >
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ vehicle.id) }}">
+                                <button class="btn btn-outline" type="submit">
+                                    Supprimer
+                                </button>
+                            </form>
+                        </p>
+                    </article>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </main>
+{% endblock %}

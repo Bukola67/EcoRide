@@ -3,48 +3,61 @@
 {% block title %}Connexion | EcoRide{% endblock %}
 
 {% block body %}
-    <h1>Connexion</h1>
 
-    {% if error %}
-        <p>{{ error.messageKey|trans(error.messageData, 'security') }}</p>
-    {% endif %}
+<section class="auth-section">
+    <div class="auth-card">
 
-    {% if app.user %}
-        <p>
-            Vous êtes connecté en tant que {{ app.user.userIdentifier }}.
-            <a href="{{ path('app_logout') }}">Se déconnecter</a>
-        </p>
-    {% else %}
-        <form method="post">
-            <label for="username">Adresse e-mail</label>
-            <input
-                type="email"
-                value="{{ last_username }}"
-                name="_username"
-                id="username"
-                autocomplete="email"
-                required
-                autofocus
-            >
+        <div class="auth-card__header">
+            <h1>Connexion</h1>
 
-            <label for="password">Mot de passe</label>
-            <input
-                type="password"
-                name="_password"
-                id="password"
-                autocomplete="current-password"
-                required
-            >
+            {% if error %}
+                <p>{{ error.messageKey|trans(error.messageData, 'security') }}</p>
+            {% endif %}
+        </div>
 
-            <input
-                type="hidden"
-                name="_csrf_token"
-                value="{{ csrf_token('authenticate') }}"
-            >
+        {% if app.user %}
+            <p>
+                Vous êtes connecté en tant que {{ app.user.userIdentifier }}.
+                <a href="{{ path('app_logout') }}">Se déconnecter</a>
+            </p>
+        {% else %}
+            <form method="post" class="auth-form">
+                <label for="username">Adresse e-mail</label>
+                <input
+                    type="email"
+                    value="{{ last_username }}"
+                    name="_username"
+                    id="username"
+                    autocomplete="email"
+                    required
+                    autofocus
+                >
 
-            <button type="submit">Se connecter</button>
-        </form>
+                <label for="password">Mot de passe</label>
+                <input
+                    type="password"
+                    name="_password"
+                    id="password"
+                    autocomplete="current-password"
+                    required
+                >
 
-        <p>Pas encore de compte ? <a href="{{ path('app_register') }}">S’inscrire</a></p>
-    {% endif %}
+                <input
+                    type="hidden"
+                    name="_csrf_token"
+                    value="{{ csrf_token('authenticate') }}"
+                >
+
+                <button type="submit">Se connecter</button>
+            </form>
+
+            <p class="auth-card__footer">
+                Pas encore de compte ?
+                <a href="{{ path('app_register') }}">Créer un compte</a>
+            </p>
+        {% endif %}
+
+    </div>
+</section>
+
 {% endblock %}

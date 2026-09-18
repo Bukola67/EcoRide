@@ -18,6 +18,8 @@
     {% endblock %}
 </head>
 <body>
+    {% set current_user = app.user %}
+
     {% include 'components/header.html.twig' %}
 
     {% for message in app.flashes('success') %}
@@ -32,10 +34,12 @@
         </div>
     {% endfor %}
 
-    <main>
+     <main>
         {% block body %}{% endblock %}
     </main>
 
     {% include 'components/footer.html.twig' %}
+
+    {% block javascripts %}{% endblock %}
 </body>
 </html>

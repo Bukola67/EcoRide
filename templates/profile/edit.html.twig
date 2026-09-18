@@ -1,0 +1,126 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier mon profil | EcoRide{% endblock %}
+
+{% block body %}
+    <div class="profile-page">
+        <div class="container">
+
+            <header class="section__header">
+                <p class="eyebrow">Espace utilisateur</p>
+                <h1>Modifier mon profil</h1>
+            </header>
+
+            <div class="profile-form-card">
+                {{ form_start(form, { attr: { enctype: 'multipart/form-data' } }) }}
+
+                    <h2>Informations</h2>
+                    {{ form_row(form.email) }}
+                    {{ form_row(form.username) }}
+
+                    <h2>Statut</h2>
+                    {{ form_row(form.isDriver, { row_attr: { class: 'form-check' } }) }}
+                    {{ form_row(form.isPassenger, { row_attr: { class: 'form-check' } }) }}
+
+                    <h2>Préférences</h2>
+                    {{ form_row(form.acceptsSmokers, { row_attr: { class: 'form-check' } }) }}
+                    {{ form_row(form.acceptsPets, { row_attr: { class: 'form-check' } }) }}
+                    {{ form_row(form.customPreferences) }}
+
+                    <h2>Photo de profil</h2>
+
+                    <div id="profile-picture-zone"
+                         data-upload-url="{{ path('app_profile_upload_picture') }}"
+                         data-csrf-token="{{ csrf_token('upload-picture') }}">
+
+                        <img
+                            id="profile-picture-preview"
+                            class="profile-picture-preview"
+                            src="{{ user.profilePicture ? asset('uploads/profiles/' ~ user.profilePicture) : asset('images/default-avatar.png') }}"
+                            alt="Photo de profil"
+                        >
+
+                        <input type="file" id="profile-picture-input" accept="image/jpeg,image/png,image/webp" hidden>
+
+                        <button type="button" class="btn btn-outline" id="profile-picture-trigger">
+                            Changer la photo
+                        </button>
+
+                        <span id="profile-picture-status" class="profile-picture-status"></span>
+                    </div>
+
+                    <p style="margin-top: 2rem;">
+                        <button class="btn btn-primary" type="submit">
+                            Enregistrer les modifications
+                        </button>
+                        <a class="btn btn-outline" href="{{ path('app_profile') }}">
+                            Annuler
+                        </a>
+                    </p>
+
+                {{ form_end(form) }}
+            </div>
+
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const zone = document.getElementById('profile-picture-zone');
+            if (!zone) return;
+
+            const input = document.getElementById('profile-picture-input');
+            const trigger = document.getElementById('profile-picture-trigger');
+            const preview = document.getElementById('profile-picture-preview');
+            const status = document.getElementById('profile-picture-status');
+            const uploadUrl = zone.dataset.uploadUrl;
+            const csrfToken = zone.dataset.csrfToken;
+
+            trigger.addEventListener('click', () => input.click());
+
+            input.addEventListener('change', async () => {
+                const file = input.files[0];
+                if (!file) return;
+
+                // Preview immédiate
+                const localUrl = URL.createObjectURL(file);
+                preview.src = localUrl;
+
+                status.textContent = 'Envoi en cours...';
+                trigger.disabled = true;
+
+                const formData = new FormData();
+                formData.append('profilePicture', file);
+
+                try {
+                    const response = await fetch(uploadUrl, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-Token': csrfToken,
+                        },
+                        body: formData,
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.error || 'Erreur lors de l’envoi.');
+                    }
+
+                    status.textContent = '✓ Photo mise à jour';
+                    status.style.color = 'green';
+                } catch (error) {
+                    status.textContent = '✗ ' + error.message;
+                    status.style.color = 'red';
+                    // On pourrait remettre l’ancienne URL si on la stockait dans un data-*
+                } finally {
+                    trigger.disabled = false;
+                    setTimeout(() => { status.textContent = ''; }, 3000);
+                }
+            });
+        });
+    </script>
+{% endblock %}
