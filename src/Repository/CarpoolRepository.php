@@ -5,6 +5,8 @@ namespace App\Repository;
 use App\Entity\Carpool;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\DBAL\LockMode;
+use Doctrine\ORM\Query;
 
 class CarpoolRepository extends ServiceEntityRepository
 {
@@ -35,12 +37,12 @@ class CarpoolRepository extends ServiceEntityRepository
             ->andWhere('LOWER(c.arrivalCity) = LOWER(:arrivalCity)')
             ->andWhere('c.departureAt BETWEEN :startOfDay AND :endOfDay')
             ->andWhere('c.remainingSeatCount > 0')
-            ->andWhere('c.status != :cancelledStatus')
+            ->andWhere('c.status = :plannedStatus')
             ->setParameter('departureCity', trim($departureCity))
             ->setParameter('arrivalCity', trim($arrivalCity))
             ->setParameter('startOfDay', $startOfDay)
             ->setParameter('endOfDay', $endOfDay)
-            ->setParameter('cancelledStatus', 'CANCELLED')
+            ->setParameter('plannedStatus', 'PLANNED')
             ->orderBy('c.departureAt', 'ASC')
             ->getQuery()
             ->getResult();
@@ -65,14 +67,19 @@ class CarpoolRepository extends ServiceEntityRepository
             ->andWhere('LOWER(c.arrivalCity) = LOWER(:arrivalCity)')
             ->andWhere('c.departureAt > :afterDate')
             ->andWhere('c.remainingSeatCount > 0')
-            ->andWhere('c.status != :cancelledStatus')
+            ->andWhere('c.status = :plannedStatus')
             ->setParameter('departureCity', trim($departureCity))
             ->setParameter('arrivalCity', trim($arrivalCity))
             ->setParameter('afterDate', $afterDate)
-            ->setParameter('cancelledStatus', 'CANCELLED')
+            ->setParameter('plannedStatus', 'PLANNED')
             ->orderBy('c.departureAt', 'ASC')
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
+    }
+
+    public function findForLock(int $id): ?Carpool
+    {
+        return $this->find($id);
     }
 }

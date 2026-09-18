@@ -100,24 +100,24 @@
                                             alt="Photo de profil de {{ carpool.driver.username }}"
                                         >
                                     {% else %}
-                                <div
-                                    class="driver-summary__placeholder"
-                                    aria-hidden="true"
-                                >
-                                    {{ carpool.driver.username|first|upper }}
+                                        <div
+                                            class="driver-summary__placeholder"
+                                            aria-hidden="true"
+                                        >
+                                            {{ carpool.driver.username|first|upper }}
+                                        </div>
+                                    {% endif %}
+
+                                    <div>
+                                        <p class="carpool-card__label">Chauffeur</p>
+                                        <h3>{{ carpool.driver.username }}</h3>
+
+                                        <p class="driver-summary__rating">
+                                            <span aria-hidden="true">★</span>
+                                            Nouvelle conductrice / nouveau conducteur
+                                        </p>
+                                    </div>
                                 </div>
-                            {% endif %}
-
-                            <div>
-                                <p class="carpool-card__label">Chauffeur</p>
-                                <h3>{{ carpool.driver.username }}</h3>
-
-                                <p class="driver-summary__rating">
-                                    <span aria-hidden="true">★</span>
-                                    Nouvelle conductrice / nouveau conducteur
-                                </p>
-                            </div>
-                        </div>
 
                                 {% if carpool.vehicle.energyType|lower == 'electric' %}
                                     <span class="badge badge-eco">
@@ -149,7 +149,10 @@
                                 </div>
                             </dl>
 
-                            <a class="btn btn-outline" href="#">
+                            <a
+                                class="btn btn-outline"
+                                href="{{ path('app_carpool_detail', { id: carpool.id }) }}"
+                            >
                                 Voir le détail
                             </a>
                         </article>

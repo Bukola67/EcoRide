@@ -7,6 +7,10 @@ use App\Enum\PostRideValidation;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: BookingRepository::class)]
+#[ORM\UniqueConstraint(
+    name: 'uniq_booking_passenger_carpool',
+    fields: ['passenger', 'carpool']
+)]
 class Booking
 {
     #[ORM\Id]
@@ -49,6 +53,18 @@ class Booking
     public function setCarpool(?Carpool $carpool): static
     {
         $this->carpool = $carpool;
+
+        return $this;
+    }
+    public function getPostRideValidation(): PostRideValidation
+    {
+        return $this->postRideValidation;
+    }
+
+    public function setPostRideValidation(
+        PostRideValidation $postRideValidation
+    ): static {
+        $this->postRideValidation = $postRideValidation;
 
         return $this;
     }

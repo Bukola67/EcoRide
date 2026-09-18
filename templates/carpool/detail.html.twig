@@ -1,0 +1,192 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Covoiturage avec {{ carpool.driver.username }}{% endblock %}
+
+{% block body %}
+    <main class="container">
+        <header class="section__header">
+            <p class="eyebrow">Détail du trajet</p>
+            <h1>
+                {{ carpool.fromCity|default('Trajet') }} → {{ carpool.toCity|default('') }}
+            </h1>
+            <p class="lead">
+                Départ le {{ carpool.departureAt|date('d/m/Y à H:i') }},
+                arrivée à {{ carpool.arrivalAt|date('H:i') }}.
+            </p>
+        </header>
+
+        <div class="cards-grid" style="grid-template-columns: 1fr;">
+            <article class="card">
+                <h2>Informations</h2>
+                <dl class="carpool-card__details">
+                    <div>
+                        <dt>Départ</dt>
+                        <dd>{{ carpool.departureAt|date('d/m/Y à H:i') }}</dd>
+                    </div>
+
+                    <div>
+                        <dt>Arrivée</dt>
+                        <dd>{{ carpool.arrivalAt|date('d/m/Y à H:i') }}</dd>
+                    </div>
+
+                    <div>
+                        <dt>Prix</dt>
+                        <dd>{{ carpool.creditCostPerPassenger }} crédits</dd>
+                    </div>
+
+                    <div>
+                        <dt>Places restantes</dt>
+                        <dd>{{ carpool.remainingSeatCount }}</dd>
+                    </div>
+                </dl>
+
+                {% if is_granted('IS_AUTHENTICATED') %}
+                    <p>
+                        <button
+                            class="btn btn-primary"
+                            type="button"
+                            data-booking-btn
+                            data-carpool-id="{{ carpool.id }}"
+                        >
+                            Participer
+                        </button>
+                    </p>
+
+                    <dialog id="booking-modal" class="modal">
+                        <form method="post" action="{{ path('app_carpool_book', { id: carpool.id }) }}">
+                            <div class="modal__content">
+                                <h2>Confirmer votre participation</h2>
+                                <p>
+                                    Trajet : <span data-booking-from></span> → <span data-booking-to></span><br>
+                                    Départ : <span data-booking-date></span><br>
+                                    Montant : <strong><span data-booking-price></span> crédits</strong><br>
+                                    Vos crédits avant : <span data-booking-credits-before></span><br>
+                                    Vos crédits après : <strong><span data-booking-credits-after></span></strong>
+                                </p>
+
+                                <div class="modal__actions">
+                                    <button class="btn btn-outline" type="button" data-close-modal>
+                                        Annuler
+                                    </button>
+                                    <button class="btn btn-primary" type="submit">
+                                        Confirmer ma participation
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </dialog>
+
+                    <script>
+                        const bookingBtn = document.querySelector('[data-booking-btn]');
+                        const modal = document.getElementById('booking-modal');
+                        const closeBtn = modal.querySelector('[data-close-modal]');
+
+                        bookingBtn.addEventListener('click', async () => {
+                            const carpoolId = bookingBtn.dataset.carpoolId;
+
+                            const res = await fetch(`/carpools/${carpoolId}/booking-preview`);
+                            const data = await res.json();
+
+                            if (!data.ok) {
+                                alert(data.error || 'Une erreur est survenue.');
+                                return;
+                            }
+
+                            modal.querySelector('[data-booking-from]').textContent = data.fromCity;
+                            modal.querySelector('[data-booking-to]').textContent = data.toCity;
+                            modal.querySelector('[data-booking-date]').textContent = data.departureAt;
+                            modal.querySelector('[data-booking-price]').textContent = data.price;
+                            modal.querySelector('[data-booking-credits-before]').textContent = data.creditsBefore;
+                            modal.querySelector('[data-booking-credits-after]').textContent = data.creditsAfter;
+
+                            modal.showModal();
+                        });
+
+                        closeBtn.addEventListener('click', () => {
+                            modal.close();
+                        });
+                    </script>
+                {% else %}
+                    <p class="alert alert-info">
+                        Connectez-vous pour participer à ce covoiturage.
+                    </p>
+                {% endif %}
+            </article>
+
+            <article class="card">
+                <h2>Chauffeur</h2>
+                <div class="driver-summary">
+                    {% if carpool.driver.profilePicture %}
+                        <img
+                            class="driver-summary__photo"
+                            src="{{ asset('images/profiles/' ~ carpool.driver.profilePicture) }}"
+                            alt="Photo de profil de {{ carpool.driver.username }}"
+                        >
+                    {% else %}
+                        <div
+                            class="driver-summary__placeholder"
+                            aria-hidden="true"
+                        >
+                            {{ carpool.driver.username|first|upper }}
+                        </div>
+                    {% endif %}
+
+                    <div>
+                        <h3>{{ carpool.driver.username }}</h3>
+
+                        <p class="driver-summary__rating">
+                            <span aria-hidden="true">★</span>
+                            Nouvelle conductrice / nouveau conducteur
+                        </p>
+
+                        {% if carpool.driver.customPreferences %}
+                            <p class="mt-2">
+                                <strong>Préférences :</strong>
+                                {{ carpool.driver.customPreferences }}
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </article>
+
+            {% if carpool.vehicle %}
+                <article class="card">
+                    <h2>Véhicule</h2>
+                    <p>
+                        {{ carpool.vehicle.model }}
+                        {% if carpool.vehicle.color %}
+                            – {{ carpool.vehicle.color }}
+                        {% endif %}
+                        ({{ carpool.vehicle.seatCount }} places, {{ carpool.vehicle.energyType }})
+                    </p>
+                </article>
+            {% endif %}
+
+            <article class="card">
+                <h2>Avis</h2>
+
+                {% if reviews|length == 0 %}
+                    <p>Aucun avis pour le moment.</p>
+                {% else %}
+                    {% for review in reviews %}
+                        <div class="mb-3">
+                            <p>
+                                <strong>{{ review.passenger.username }}</strong>
+                                – {{ review.rating }}/5
+                            </p>
+                            {% if review.comment %}
+                                <p>{{ review.comment }}</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </article>
+        </div>
+
+        <p class="mt-4">
+            <a href="{{ path('app_carpool_index') }}">
+                ← Retour à la liste
+            </a>
+        </p>
+    </main>
+{% endblock %}

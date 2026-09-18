@@ -206,6 +206,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setCredits(int $credits): static
     {
+        if ($credits < 0) {
+            throw new \InvalidArgumentException('Le solde de crédits ne peut pas être négatif.');
+        }
+
         $this->credits = $credits;
 
         return $this;
