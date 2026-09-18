@@ -114,10 +114,21 @@ final class ProfileController extends AbstractController
         }
 
         $newFilename = $this->uploadProfilePicture($photo);
+
+        $oldFilename = $user->getProfilePicture();
+
         $user->setProfilePicture($newFilename);
         $user->setUpdatedAt(new \DateTimeImmutable());
 
         $em->flush();
+
+        if ($oldFilename) {
+            $oldPath = $this->profilePicturesDir . '/' . $oldFilename;
+
+            if (is_file($oldPath)) {
+                unlink($oldPath);
+            }
+        }
 
         return new JsonResponse([
             'success' => true,

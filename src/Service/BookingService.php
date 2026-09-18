@@ -74,13 +74,15 @@ final class BookingService
             }
 
             // 5. Pas de double réservation
-            $existing = $this->bookingRepository->findOneBy([
+            $existingBooking = $this->bookingRepository->findOneBy([
                 'passenger' => $passenger,
                 'carpool' => $carpool,
             ]);
 
-            if ($existing) {
-                throw new \RuntimeException('Vous avez déjà réservé ce trajet.');
+            if ($existingBooking && $existingBooking->getStatus() === 'CONFIRMED') {
+                throw new \RuntimeException(
+                    'Vous avez déjà réservé ce trajet.'
+                );
             }
 
             // 6. Crédits suffisants
@@ -95,12 +97,23 @@ final class BookingService
             }
 
             // Création réservation
-            $booking = new Booking();
-            $booking->setPassenger($passenger);
-            $booking->setCarpool($carpool);
-            $booking->setPostRideValidation(PostRideValidation::Pending);
+            if ($existingBooking && $existingBooking->getStatus() === 'CANCELLED') {
+                /*
+                * Réservation renouvelée : on conserve l’unique ligne Booking,
+                * compatible avec la contrainte SQL (passenger_id, carpool_id).
+                */
+                $booking = $existingBooking;
+                $booking->setStatus('CONFIRMED');
+                $booking->setPostRideValidation(PostRideValidation::Pending);
+            } else {
+                $booking = new Booking();
+                $booking->setPassenger($passenger);
+                $booking->setCarpool($carpool);
+                $booking->setStatus('CONFIRMED');
+                $booking->setPostRideValidation(PostRideValidation::Pending);
 
-            $this->em->persist($booking);
+                $this->em->persist($booking);
+            }
             
 
             // Débit passager

@@ -1,14 +1,18 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Covoiturage avec {{ carpool.driver.username }}{% endblock %}
+{% block title %}
+    Covoiturage {{ carpool.departureCity }} → {{ carpool.arrivalCity }} | EcoRide
+{% endblock %}
 
 {% block body %}
     <main class="container">
         <header class="section__header">
             <p class="eyebrow">Détail du trajet</p>
+
             <h1>
-                {{ carpool.fromCity|default('Trajet') }} → {{ carpool.toCity|default('') }}
+                {{ carpool.departureCity }} → {{ carpool.arrivalCity }}
             </h1>
+
             <p class="lead">
                 Départ le {{ carpool.departureAt|date('d/m/Y à H:i') }},
                 arrivée à {{ carpool.arrivalAt|date('H:i') }}.
@@ -18,14 +22,35 @@
         <div class="cards-grid" style="grid-template-columns: 1fr;">
             <article class="card">
                 <h2>Informations</h2>
+
                 <dl class="carpool-card__details">
+                    <div>
+                        <dt>Ville de départ</dt>
+                        <dd>{{ carpool.departureCity }}</dd>
+                    </div>
+
+                    <div>
+                        <dt>Adresse de départ</dt>
+                        <dd>{{ carpool.departureAddress }}</dd>
+                    </div>
+
+                    <div>
+                        <dt>Ville d’arrivée</dt>
+                        <dd>{{ carpool.arrivalCity }}</dd>
+                    </div>
+
+                    <div>
+                        <dt>Adresse d’arrivée</dt>
+                        <dd>{{ carpool.arrivalAddress }}</dd>
+                    </div>
+
                     <div>
                         <dt>Départ</dt>
                         <dd>{{ carpool.departureAt|date('d/m/Y à H:i') }}</dd>
                     </div>
 
                     <div>
-                        <dt>Arrivée</dt>
+                        <dt>Arrivée estimée</dt>
                         <dd>{{ carpool.arrivalAt|date('d/m/Y à H:i') }}</dd>
                     </div>
 
@@ -40,7 +65,49 @@
                     </div>
                 </dl>
 
-                {% if is_granted('IS_AUTHENTICATED') %}
+                {# --------- Zone de réservation --------- #}
+
+                {% if not is_granted('IS_AUTHENTICATED') %}
+                    <p class="alert alert-info">
+                        Connectez-vous pour participer à ce covoiturage.
+                    </p>
+
+                {% elseif existingBooking and existingBooking.status == 'CONFIRMED' %}
+                    <p class="alert alert-success">
+                        Vous participez déjà à ce covoiturage.
+                        <a href="{{ path('app_my_participations') }}">
+                            Consulter mes participations
+                        </a>
+                    </p>
+
+                {% elseif carpool.driver.id == app.user.id %}
+                    <p class="alert alert-info">
+                        Vous êtes le chauffeur de ce covoiturage.
+                    </p>
+
+                {% elseif carpool.status != 'PLANNED' %}
+                    <p class="alert alert-warning">
+                        Ce covoiturage n’est plus disponible à la réservation.
+                    </p>
+
+                {% elseif carpool.remainingSeatCount <= 0 %}
+                    <p class="alert alert-warning">
+                        Il n’y a plus de place disponible pour ce covoiturage.
+                    </p>
+
+                {% elseif app.user.credits < carpool.creditCostPerPassenger %}
+                    <p class="alert alert-warning">
+                        Votre solde de crédits est insuffisant pour participer à ce trajet.
+                    </p>
+
+                {% else %}
+                    {% if existingBooking and existingBooking.status == 'CANCELLED' %}
+                        <p class="alert alert-info">
+                            Votre précédente participation a été annulée.
+                            Vous pouvez réserver ce trajet à nouveau.
+                        </p>
+                    {% endif %}
+
                     <p>
                         <button
                             class="btn btn-primary"
@@ -48,26 +115,63 @@
                             data-booking-btn
                             data-carpool-id="{{ carpool.id }}"
                         >
-                            Participer
+                            {{ existingBooking and existingBooking.status == 'CANCELLED'
+                                ? 'Participer à nouveau'
+                                : 'Participer'
+                            }}
                         </button>
                     </p>
 
                     <dialog id="booking-modal" class="modal">
-                        <form method="post" action="{{ path('app_carpool_book', { id: carpool.id }) }}">
+                        <form
+                            method="post"
+                            action="{{ path('app_carpool_book', { id: carpool.id }) }}"
+                        >
+                            <input
+                                type="hidden"
+                                name="_token"
+                                value="{{ csrf_token('booking' ~ carpool.id) }}"
+                            >
+
                             <div class="modal__content">
                                 <h2>Confirmer votre participation</h2>
+
                                 <p>
-                                    Trajet : <span data-booking-from></span> → <span data-booking-to></span><br>
-                                    Départ : <span data-booking-date></span><br>
-                                    Montant : <strong><span data-booking-price></span> crédits</strong><br>
-                                    Vos crédits avant : <span data-booking-credits-before></span><br>
-                                    Vos crédits après : <strong><span data-booking-credits-after></span></strong>
+                                    Trajet :
+                                    <span data-booking-from></span>
+                                    →
+                                    <span data-booking-to></span>
+                                    <br>
+
+                                    Départ :
+                                    <span data-booking-date></span>
+                                    <br>
+
+                                    Montant :
+                                    <strong>
+                                        <span data-booking-price></span> crédits
+                                    </strong>
+                                    <br>
+
+                                    Vos crédits avant :
+                                    <span data-booking-credits-before></span>
+                                    <br>
+
+                                    Vos crédits après :
+                                    <strong>
+                                        <span data-booking-credits-after></span>
+                                    </strong>
                                 </p>
 
                                 <div class="modal__actions">
-                                    <button class="btn btn-outline" type="button" data-close-modal>
+                                    <button
+                                        class="btn btn-outline"
+                                        type="button"
+                                        data-close-modal
+                                    >
                                         Annuler
                                     </button>
+
                                     <button class="btn btn-primary" type="submit">
                                         Confirmer ma participation
                                     </button>
@@ -75,51 +179,17 @@
                             </div>
                         </form>
                     </dialog>
-
-                    <script>
-                        const bookingBtn = document.querySelector('[data-booking-btn]');
-                        const modal = document.getElementById('booking-modal');
-                        const closeBtn = modal.querySelector('[data-close-modal]');
-
-                        bookingBtn.addEventListener('click', async () => {
-                            const carpoolId = bookingBtn.dataset.carpoolId;
-
-                            const res = await fetch(`/carpools/${carpoolId}/booking-preview`);
-                            const data = await res.json();
-
-                            if (!data.ok) {
-                                alert(data.error || 'Une erreur est survenue.');
-                                return;
-                            }
-
-                            modal.querySelector('[data-booking-from]').textContent = data.fromCity;
-                            modal.querySelector('[data-booking-to]').textContent = data.toCity;
-                            modal.querySelector('[data-booking-date]').textContent = data.departureAt;
-                            modal.querySelector('[data-booking-price]').textContent = data.price;
-                            modal.querySelector('[data-booking-credits-before]').textContent = data.creditsBefore;
-                            modal.querySelector('[data-booking-credits-after]').textContent = data.creditsAfter;
-
-                            modal.showModal();
-                        });
-
-                        closeBtn.addEventListener('click', () => {
-                            modal.close();
-                        });
-                    </script>
-                {% else %}
-                    <p class="alert alert-info">
-                        Connectez-vous pour participer à ce covoiturage.
-                    </p>
                 {% endif %}
             </article>
 
             <article class="card">
                 <h2>Chauffeur</h2>
+
                 <div class="driver-summary">
                     {% if carpool.driver.profilePicture %}
                         <img
                             class="driver-summary__photo"
-                            src="{{ asset('images/profiles/' ~ carpool.driver.profilePicture) }}"
+                            src="{{ asset('uploads/profiles/' ~ carpool.driver.profilePicture) }}"
                             alt="Photo de profil de {{ carpool.driver.username }}"
                         >
                     {% else %}
@@ -139,8 +209,24 @@
                             Nouvelle conductrice / nouveau conducteur
                         </p>
 
+                        <p class="driver-summary__rating">
+                            {% if carpool.driver.acceptsSmokers %}
+                                Fumeurs acceptés
+                            {% else %}
+                                Non-fumeur
+                            {% endif %}
+
+                            ·
+
+                            {% if carpool.driver.acceptsPets %}
+                                Animaux acceptés
+                            {% else %}
+                                Pas d’animaux
+                            {% endif %}
+                        </p>
+
                         {% if carpool.driver.customPreferences %}
-                            <p class="mt-2">
+                            <p>
                                 <strong>Préférences :</strong>
                                 {{ carpool.driver.customPreferences }}
                             </p>
@@ -152,32 +238,41 @@
             {% if carpool.vehicle %}
                 <article class="card">
                     <h2>Véhicule</h2>
+
                     <p>
-                        {{ carpool.vehicle.model }}
+                        <strong>Modèle :</strong> {{ carpool.vehicle.model }}<br>
+
                         {% if carpool.vehicle.color %}
-                            – {{ carpool.vehicle.color }}
+                            <strong>Couleur :</strong>
+                            {{ carpool.vehicle.color }}<br>
                         {% endif %}
-                        ({{ carpool.vehicle.seatCount }} places, {{ carpool.vehicle.energyType }})
+
+                        <strong>Énergie :</strong>
+                        {{ carpool.vehicle.energyType }}<br>
+
+                        <strong>Places dans le véhicule :</strong>
+                        {{ carpool.vehicle.seatCount }}
                     </p>
                 </article>
             {% endif %}
 
             <article class="card">
-                <h2>Avis</h2>
+                <h2>Avis du chauffeur</h2>
 
-                {% if reviews|length == 0 %}
-                    <p>Aucun avis pour le moment.</p>
+                {% if reviews is empty %}
+                    <p>Aucun avis validé pour le moment.</p>
                 {% else %}
                     {% for review in reviews %}
-                        <div class="mb-3">
+                        <article class="review">
                             <p>
                                 <strong>{{ review.passenger.username }}</strong>
-                                – {{ review.rating }}/5
+                                — {{ review.rating }}/5
                             </p>
+
                             {% if review.comment %}
                                 <p>{{ review.comment }}</p>
                             {% endif %}
-                        </div>
+                        </article>
                     {% endfor %}
                 {% endif %}
             </article>
@@ -185,8 +280,82 @@
 
         <p class="mt-4">
             <a href="{{ path('app_carpool_index') }}">
-                ← Retour à la liste
+                ← Retour à la recherche
             </a>
         </p>
     </main>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const bookingBtn = document.querySelector('[data-booking-btn]');
+            const modal = document.getElementById('booking-modal');
+
+            if (!bookingBtn || !modal) {
+                return;
+            }
+
+            const closeBtn = modal.querySelector('[data-close-modal]');
+
+            bookingBtn.addEventListener('click', async () => {
+                const carpoolId = bookingBtn.dataset.carpoolId;
+
+                try {
+                    const response = await fetch(
+                        `/carpools/${carpoolId}/booking-preview`,
+                        {
+                            headers: {
+                                'Accept': 'application/json',
+                            },
+                        }
+                    );
+
+                    const data = await response.json();
+
+                    if (!response.ok || !data.ok) {
+                        throw new Error(
+                            data.error ?? 'Impossible de préparer la réservation.'
+                        );
+                    }
+
+                    modal.querySelector('[data-booking-from]').textContent =
+                        data.fromCity;
+
+                    modal.querySelector('[data-booking-to]').textContent =
+                        data.toCity;
+
+                    modal.querySelector('[data-booking-date]').textContent =
+                        data.departureAt;
+
+                    modal.querySelector('[data-booking-price]').textContent =
+                        data.price;
+
+                    modal.querySelector(
+                        '[data-booking-credits-before]'
+                    ).textContent = data.creditsBefore;
+
+                    modal.querySelector(
+                        '[data-booking-credits-after]'
+                    ).textContent = data.creditsAfter;
+
+                    modal.showModal();
+                } catch (error) {
+                    window.alert(
+                        error.message ?? 'Une erreur est survenue.'
+                    );
+                }
+            });
+
+            closeBtn?.addEventListener('click', () => {
+                modal.close();
+            });
+
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    modal.close();
+                }
+            });
+        });
+    </script>
 {% endblock %}

@@ -2,8 +2,8 @@
 
 namespace App\Entity;
 
-use App\Repository\BookingRepository;
 use App\Enum\PostRideValidation;
+use App\Repository\BookingRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: BookingRepository::class)]
@@ -28,6 +28,10 @@ class Booking
 
     #[ORM\Column(length: 20, enumType: PostRideValidation::class)]
     private PostRideValidation $postRideValidation = PostRideValidation::Pending;
+
+    #[ORM\Column(length: 20)]
+    private string $status = 'CONFIRMED';
+
     public function getId(): ?int
     {
         return $this->id;
@@ -56,6 +60,7 @@ class Booking
 
         return $this;
     }
+
     public function getPostRideValidation(): PostRideValidation
     {
         return $this->postRideValidation;
@@ -65,6 +70,18 @@ class Booking
         PostRideValidation $postRideValidation
     ): static {
         $this->postRideValidation = $postRideValidation;
+
+        return $this;
+    }
+
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): static
+    {
+        $this->status = $status;
 
         return $this;
     }

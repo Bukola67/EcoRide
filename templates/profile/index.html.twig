@@ -49,6 +49,36 @@
                     </a>
                 </p>
             </article>
+
+            {% if user.isDriver and user.isActive %}
+                <article class="card">
+                    <h2>Mes trajets</h2>
+                    <p>
+                        Retrouvez les trajets que vous conduisez et ceux auxquels vous participez.
+                    </p>
+
+                    <p>
+                        <a class="btn btn-outline" href="{{ path('app_my_participations') }}">
+                            Mes participations
+                        </a>
+                    </p>
+
+                     <p>
+                        <a class="btn btn-outline" href="{{ path('app_my_driven_carpools') }}">
+                                Mes covoiturages proposés
+                        </a>
+                    </p>
+
+                     <p>
+                        <a class="btn btn-primary" href="{{ path('app_carpool_new') }}">
+                                Publier un covoiturage
+                        </a>
+                    </p>
+
+
+                    
+                </article>
+            {% endif %}
         </div>
     </main>
 {% endblock %}
