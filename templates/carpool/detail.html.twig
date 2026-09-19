@@ -287,14 +287,18 @@
 {% endblock %}
 
 {% block javascripts %}
+    {{ parent() }}
+
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        const initializeBookingModal = () => {
             const bookingBtn = document.querySelector('[data-booking-btn]');
             const modal = document.getElementById('booking-modal');
 
-            if (!bookingBtn || !modal) {
+            if (!bookingBtn || !modal || bookingBtn.dataset.bookingInitialized) {
                 return;
             }
+
+            bookingBtn.dataset.bookingInitialized = 'true';
 
             const closeBtn = modal.querySelector('[data-close-modal]');
 
@@ -356,6 +360,9 @@
                     modal.close();
                 }
             });
-        });
+        };
+
+        document.addEventListener('DOMContentLoaded', initializeBookingModal);
+        document.addEventListener('turbo:load', initializeBookingModal);
     </script>
 {% endblock %}

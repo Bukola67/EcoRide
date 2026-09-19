@@ -7,6 +7,8 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    mongodb.uri: '%env(MONGODB_URI)%'
+    mongodb.database: '%env(MONGODB_DATABASE)%'
 
 services:
     # default configuration for services in *this* file
@@ -25,3 +27,11 @@ services:
         arguments:
             $profilePicturesDir: '%kernel.project_dir%/public/uploads/profiles'
             $slugger: '@Symfony\Component\String\Slugger\SluggerInterface'
+
+    MongoDB\Client:
+        arguments:
+            $uri: '%mongodb.uri%'
+
+    App\Service\IncidentService:
+        arguments:
+            $databaseName: '%mongodb.database%'

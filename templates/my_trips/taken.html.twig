@@ -1,0 +1,70 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes trajets effectués{% endblock %}
+
+{% block body %}
+<div class="container my-4">
+    <h1>Mes trajets effectués</h1>
+
+    {% for booking in bookings %}
+        {% set carpool = booking.carpool %}
+
+        {% if carpool %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        {{ carpool.departureCity }} → {{ carpool.arrivalCity }}
+                    </h5>
+
+                    <p class="card-text">
+                        Date : {{ carpool.departureAt|date('d/m/Y à H:i') }}<br>
+                        Statut : {{ carpool.status }}<br>
+                        État de la validation passager :
+
+                        {% if booking.postRideValidation.name == 'Pending' %}
+                            <span class="badge bg-warning text-dark">
+                                À valider
+                            </span>
+                        {% elseif booking.postRideValidation.name == 'Ok' %}
+                            <span class="badge bg-success">
+                                Trajet validé
+                            </span>
+                        {% elseif booking.postRideValidation.name == 'Incident' %}
+                            <span class="badge bg-danger">
+                                Incident signalé
+                            </span>
+                        {% endif %}
+                    </p>
+
+                    {% if carpool.status == 'COMPLETED'
+                        and booking.postRideValidation.name == 'Pending' %}
+                        <a
+                            href="{{ path('app_passenger_validate', { id: booking.id }) }}"
+                            class="btn btn-primary"
+                        >
+                            Valider le trajet
+                        </a>
+                    {% elseif booking.postRideValidation.name != 'Pending' %}
+                        <span class="text-muted">
+                            Vous avez déjà traité ce trajet.
+                        </span>
+                    {% endif %}
+
+                    <a
+                        href="{{ path('app_carpool_detail', { id: carpool.id }) }}"
+                        class="btn btn-secondary"
+                    >
+                        Voir le détail
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    {% else %}
+        <p>Vous n’avez encore effectué aucun trajet en tant que passager.</p>
+    {% endfor %}
+
+    <a href="{{ path('app_home') }}" class="btn btn-secondary mt-3">
+        Retour à l’accueil
+    </a>
+</div>
+{% endblock %}

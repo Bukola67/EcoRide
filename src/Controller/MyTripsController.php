@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Entity\Booking;
 use App\Entity\Carpool;
 use App\Service\CancellationService;
+use App\Service\RideLifeCycleService;
 use Symfony\Component\HttpFoundation\Request;
 use App\Repository\BookingRepository;
 use App\Repository\CarpoolRepository;
@@ -144,4 +145,86 @@ final class MyTripsController extends AbstractController
 
         return $this->redirectToRoute('app_my_driven_carpools');
     }
+
+    #[Route(
+    '/my-trips/driven/{id}/start',
+    name: 'app_carpool_start',
+    methods: ['POST']
+)]
+public function startDrivenCarpool(
+    int $id,
+    Request $request,
+    CarpoolRepository $carpoolRepository,
+    RideLifeCycleService $rideLifeCycleService
+): Response {
+    $this->denyAccessUnlessGranted('IS_AUTHENTICATED');
+
+    $carpool = $carpoolRepository->find($id);
+
+    if (!$carpool) {
+        throw $this->createNotFoundException('Covoiturage introuvable.');
+    }
+
+    if (!$this->isCsrfTokenValid(
+        'start-carpool' . $carpool->getId(),
+        (string) $request->request->get('_token')
+    )) {
+        throw $this->createAccessDeniedException('Jeton de sécurité invalide.');
+    }
+
+    /** @var User $user */
+    $user = $this->getUser();
+
+    try {
+        $rideLifeCycleService->start($carpool, $user);
+        $this->addFlash('success', 'Le covoiturage a démarré.');
+    } catch (\RuntimeException $exception) {
+        $this->addFlash('error', $exception->getMessage());
+    }
+
+    return $this->redirectToRoute('app_my_driven_carpools');
+}
+
+    #[Route(
+        '/my-trips/driven/{id}/complete',
+        name: 'app_carpool_complete',
+        methods: ['POST']
+    )]
+    public function completeDrivenCarpool(
+        int $id,
+        Request $request,
+        CarpoolRepository $carpoolRepository,
+        RideLifeCycleService $rideLifeCycleService
+    ): Response {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED');
+
+        $carpool = $carpoolRepository->find($id);
+
+        if (!$carpool) {
+            throw $this->createNotFoundException('Covoiturage introuvable.');
+        }
+
+        if (!$this->isCsrfTokenValid(
+            'complete-carpool' . $carpool->getId(),
+            (string) $request->request->get('_token')
+        )) {
+            throw $this->createAccessDeniedException('Jeton de sécurité invalide.');
+        }
+
+        /** @var User $user */
+        $user = $this->getUser();
+
+        try {
+            $rideLifeCycleService->complete($carpool, $user);
+            $this->addFlash(
+                'success',
+                'Le trajet est terminé. Les participants ont été invités à le confirmer.'
+            );
+        } catch (\RuntimeException $exception) {
+            $this->addFlash('error', $exception->getMessage());
+        }
+
+        return $this->redirectToRoute('app_my_driven_carpools');
+    }
+
 }

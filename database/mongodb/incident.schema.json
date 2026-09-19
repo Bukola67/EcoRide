@@ -5,6 +5,10 @@
     "required": [
       "carpool_id",
       "booking_id",
+      "passenger_username",
+      "passenger_email",
+      "driver_username",
+      "driver_email",
       "passenger_id",
       "driver_id",
       "departure",
@@ -21,6 +25,18 @@
       "carpool_id": {
         "bsonType": "int",
         "description": "Reference to carpool.id (MySQL)"
+      },
+      "passenger_username": {
+        "bsonType": "string"
+      },
+      "passenger_email": {
+        "bsonType": "string"
+      },
+      "driver_username": {
+        "bsonType": "string"
+      },
+      "driver_email": {
+        "bsonType": "string"
       },
       "booking_id": {
         "bsonType": "int",

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
 use App\Enum\PostRideValidation;
@@ -31,6 +33,9 @@ class Booking
 
     #[ORM\Column(length: 20)]
     private string $status = 'CONFIRMED';
+
+    #[ORM\Column]
+    private bool $driverCredited = false;
 
     public function getId(): ?int
     {
@@ -82,6 +87,18 @@ class Booking
     public function setStatus(string $status): static
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    public function isDriverCredited(): bool
+    {
+        return $this->driverCredited;
+    }
+
+    public function setDriverCredited(bool $driverCredited): static
+    {
+        $this->driverCredited = $driverCredited;
 
         return $this;
     }

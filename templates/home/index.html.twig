@@ -3,15 +3,20 @@
 {% block title %}EcoRide | Le covoiturage français écologique{% endblock %}
 
 {% block body %}
+
     <section class="hero hero--home">
         <div class="container hero__grid">
+
             <div class="hero__content">
                 <p class="eyebrow">
                     <span aria-hidden="true"></span>
                     Le covoiturage français écologique
                 </p>
 
-                <h1>Voyagez ensemble,<br>roulez plus responsable.</h1>
+                <h1>
+                    Voyagez ensemble,<br>
+                    roulez plus responsable.
+                </h1>
 
                 <p class="lead">
                     EcoRide vous aide à trouver un trajet près de chez vous,
@@ -34,20 +39,26 @@
                     src="{{ asset('images/hero-ecoride.jpg') }}"
                     alt="Une voiture roule sur une route bordée de nature"
                 >
+
                 <div class="hero__eco-card">
                     <span class="hero__eco-icon" aria-hidden="true"></span>
+
                     <div>
                         <strong>Moins de trajets seuls</strong>
                         <span>Plus de mobilité partagée</span>
                     </div>
                 </div>
             </div>
+
         </div>
     </section>
 
+
     <section id="search" class="search-section">
         <div class="container">
+
             <div class="search-panel search-panel--floating">
+
                 <div class="search-panel__heading">
                     <p class="eyebrow">Votre prochain trajet</p>
                     <h2>Où souhaitez-vous aller ?</h2>
@@ -60,6 +71,7 @@
                 >
                     <div class="form-group">
                         <label for="departure">Ville de départ</label>
+
                         <input
                             id="departure"
                             name="departure"
@@ -72,6 +84,7 @@
 
                     <div class="form-group">
                         <label for="arrival">Ville d’arrivée</label>
+
                         <input
                             id="arrival"
                             name="arrival"
@@ -84,6 +97,7 @@
 
                     <div class="form-group">
                         <label for="date">Date de départ</label>
+
                         <input
                             id="date"
                             name="date"
@@ -93,19 +107,28 @@
                         >
                     </div>
 
-                    <button class="btn btn-primary search-form__submit" type="submit">
+                    <button
+                        class="btn btn-primary search-form__submit"
+                        type="submit"
+                    >
                         Rechercher
                     </button>
                 </form>
+
             </div>
+
         </div>
     </section>
 
+
     <section id="how-it-works" class="section">
         <div class="container">
+
             <header class="section__header">
                 <p class="eyebrow">Simple et responsable</p>
+
                 <h2>Le covoiturage, plus simplement</h2>
+
                 <p>
                     EcoRide met en relation des voyageurs pour rendre chaque
                     déplacement plus économique, convivial et respectueux de l’environnement.
@@ -113,40 +136,169 @@
             </header>
 
             <div class="benefits-grid">
+
                 <article class="benefit-card">
-                    
                     <h3>Recherchez</h3>
-                    <p>Indiquez votre ville de départ, votre destination et votre date de voyage.</p>
+
+                    <p>
+                        Indiquez votre ville de départ, votre destination
+                        et votre date de voyage.
+                    </p>
                 </article>
 
                 <article class="benefit-card">
-                    
                     <h3>Choisissez</h3>
-                    <p>Comparez les horaires, le prix, les places disponibles et les informations du chauffeur.</p>
+
+                    <p>
+                        Comparez les horaires, le prix, les places disponibles
+                        et les informations du chauffeur.
+                    </p>
                 </article>
 
                 <article class="benefit-card">
                     <h3>Partagez</h3>
-                    <p>Voyagez à plusieurs et privilégiez les trajets effectués en véhicule électrique.</p>
+
+                    <p>
+                        Voyagez à plusieurs et privilégiez les trajets effectués
+                        en véhicule électrique.
+                    </p>
                 </article>
+
             </div>
+
         </div>
     </section>
 
+
     <section class="section section--light">
         <div class="container commitment">
+
             <div class="commitment__content">
                 <p class="eyebrow">Notre engagement</p>
+
                 <h2>Chaque place partagée compte.</h2>
+
                 <p class="lead">
                     En favorisant le covoiturage et les véhicules électriques,
                     EcoRide contribue à des déplacements plus sobres au quotidien.
                 </p>
             </div>
 
-            <a class="btn btn-secondary" href="{{ path('app_carpool_index') }}">
+            <a
+                class="btn btn-secondary"
+                href="{{ path('app_carpool_index') }}"
+            >
                 Voir les covoiturages
             </a>
+
         </div>
     </section>
+
+    {% if pendingValidationBooking %}
+        <dialog
+            id="post-ride-validation-modal"
+            class="modal"
+            aria-labelledby="post-ride-validation-title"
+        >
+            <div class="modal__content">
+
+                <p class="eyebrow">Action requise</p>
+
+                <h2 id="post-ride-validation-title">
+                    Votre trajet est terminé
+                </h2>
+
+                <p>
+                    Confirmez le déroulement de votre covoiturage
+                    <strong>
+                        {{ pendingValidationBooking.carpool.departureCity }}
+                        →
+                        {{ pendingValidationBooking.carpool.arrivalCity }}
+                    </strong>
+                    afin de permettre le versement au chauffeur.
+                </p>
+
+                <div class="modal__actions">
+                    <a
+                        class="btn btn-primary"
+                        href="{{ path('app_passenger_validate', {
+                            id: pendingValidationBooking.id,
+                            outcome: 'ok'
+                        }) }}"
+                    >
+                        Le trajet s’est bien passé
+                    </a>
+
+                    <a
+                        class="btn btn-danger"
+                        href="{{ path('app_passenger_validate', {
+                            id: pendingValidationBooking.id,
+                            outcome: 'incident'
+                        }) }}"
+                    >
+                        Déclarer un incident
+                    </a>
+
+                    <button
+                        class="btn btn-outline"
+                        type="button"
+                        data-close-validation-modal
+                    >
+                        Plus tard
+                    </button>
+                </div>
+
+                <p class="modal__notice">
+                    En cas d’incident, EcoRide enregistre votre signalement et un membre
+                    de l’équipe vous recontactera. Le versement au chauffeur reste suspendu
+                    jusqu’au traitement du dossier.
+                </p>
+            </div>
+        </dialog>
+    {% endif %}
+
+{% endblock %}
+
+
+{% block javascripts %}
+    {{ parent() }}
+
+    {% if pendingValidationBooking %}
+        <script>
+            const initializePostRideValidationModal = () => {
+                const modal = document.getElementById(
+                    'post-ride-validation-modal'
+                );
+
+                if (!modal || modal.dataset.initialized === 'true') {
+                    return;
+                }
+
+                modal.dataset.initialized = 'true';
+                modal.showModal();
+
+                modal
+                    .querySelector('[data-close-validation-modal]')
+                    ?.addEventListener('click', () => {
+                        modal.close();
+                    });
+
+                modal.addEventListener('click', (event) => {
+                    if (event.target === modal) {
+                        modal.close();
+                    }
+                });
+            };
+
+            document.addEventListener(
+                'DOMContentLoaded',
+                initializePostRideValidationModal
+            );
+
+            document.addEventListener(
+                'turbo:load',
+                initializePostRideValidationModal
+            );
+        </script>
+    {% endif %}
 {% endblock %}

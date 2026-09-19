@@ -105,16 +105,18 @@ final class BookingService
                 $booking = $existingBooking;
                 $booking->setStatus('CONFIRMED');
                 $booking->setPostRideValidation(PostRideValidation::Pending);
+                $booking->setDriverCredited(false);
             } else {
                 $booking = new Booking();
                 $booking->setPassenger($passenger);
                 $booking->setCarpool($carpool);
                 $booking->setStatus('CONFIRMED');
                 $booking->setPostRideValidation(PostRideValidation::Pending);
+                $booking->setDriverCredited(false);
 
                 $this->em->persist($booking);
             }
-            
+         
 
             // Débit passager
             $passenger->setCredits($passenger->getCredits() - $price);
@@ -138,7 +140,10 @@ final class BookingService
 
             return $booking;
         } catch (\Throwable $e) {
+        if ($this->em->getConnection()->isTransactionActive()) {
             $this->em->getConnection()->rollBack();
+        }
+
             throw $e;
         }
     }

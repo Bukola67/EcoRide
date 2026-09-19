@@ -123,6 +123,38 @@
                                 >
                                     Voir le détail
                                 </a>
+                                
+                {% if carpool.status == 'PLANNED' %}
+                    <form
+                        method="post"
+                        action="{{ path('app_carpool_start', { id: carpool.id }) }}"
+                    >
+                        <input
+                            type="hidden"
+                            name="_token"
+                            value="{{ csrf_token('start-carpool' ~ carpool.id) }}"
+                        >
+
+                        <button class="btn btn-success" type="submit">
+                            Démarrer
+                        </button>
+                    </form>
+                {% elseif carpool.status == 'STARTED' %}
+                    <form
+                        method="post"
+                        action="{{ path('app_carpool_complete', { id: carpool.id }) }}"
+                    >
+                        <input
+                            type="hidden"
+                            name="_token"
+                            value="{{ csrf_token('complete-carpool' ~ carpool.id) }}"
+                        >
+
+                        <button class="btn btn-success" type="submit">
+                            Arrivée à destination
+                        </button>
+                    </form>
+                {% endif %}
 
                 {% if carpool.status == 'PLANNED' and carpool.departureAt > date() %}
                     <form

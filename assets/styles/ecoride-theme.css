@@ -459,6 +459,62 @@ textarea:focus {
 }
 
 /* ============================================================
+   VALIDATION APRÈS TRAJET
+   ============================================================ */
+
+.validation-form-card {
+    width: 100%;
+    max-width: 44rem;
+    margin-inline: auto;
+}
+
+.validation-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.35rem;
+}
+
+.validation-form__choices > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.validation-form__choices label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.85rem;
+    padding: 0.65rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-background);
+    cursor: pointer;
+    transition:
+        border-color var(--transition),
+        background-color var(--transition);
+}
+
+.validation-form__choices label:hover {
+    border-color: var(--color-primary);
+    background: rgb(99 107 41 / 0.08);
+}
+
+.validation-form__choices input[type="radio"] {
+    width: auto;
+    min-width: auto;
+    min-height: auto;
+    margin: 0;
+    padding: 0;
+    accent-color: var(--color-primary);
+}
+
+.form-help {
+    color: var(--color-muted);
+    font-size: 0.85rem;
+}
+
+/* ============================================================
    ESPACE PROFIL
    ============================================================ */
 
@@ -1322,6 +1378,13 @@ textarea:focus {
 
 .carpool-card > .btn {
     align-self: flex-start;
+}
+
+.modal__notice {
+    margin: 1rem 0 0;
+    color: var(--color-muted);
+    font-size: 0.9rem;
+    line-height: 1.5;
 }
 
 @media (min-width: 48rem) {
