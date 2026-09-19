@@ -68,11 +68,13 @@ final class IncidentService
                 $carpool->getDepartureCity(),
                 $carpool->getDepartureAddress()
             ),
+
             'arrival' => sprintf(
                 '%s — %s',
                 $carpool->getArrivalCity(),
                 $carpool->getArrivalAddress()
             ),
+
             'departure_at' => $this->toUtcDateTime($departureAt),
             'arrival_at' => $this->toUtcDateTime($arrivalAt),
 
@@ -96,29 +98,67 @@ final class IncidentService
             ->toArray();
     }
 
-    public function updateStatus(string $id, string $status): void
-    {
-        $allowedStatuses = ['OPEN', 'IN_PROGRESS', 'RESOLVED'];
+    public function updateStatus(
+        string $incidentId,
+        string $newStatus
+    ): void {
+        $allowedTransitions = [
+            'OPEN' => ['IN_PROGRESS'],
+            'IN_PROGRESS' => ['RESOLVED'],
+            'RESOLVED' => [],
+        ];
 
-        if (!in_array($status, $allowedStatuses, true)) {
+        if (!isset($allowedTransitions[$newStatus])) {
             throw new \InvalidArgumentException(
-                'Statut d’incident invalide.'
+                'Le statut demandé est invalide.'
             );
         }
 
-        $result = $this->incidents->updateOne(
-            ['_id' => new ObjectId($id)],
+        try {
+            $objectId = new ObjectId($incidentId);
+        } catch (\Throwable) {
+            throw new \InvalidArgumentException(
+                'Identifiant d’incident invalide.'
+            );
+        }
+
+        $incident = $this->incidents->findOne([
+            '_id' => $objectId,
+        ]);
+
+        if (!$incident) {
+            throw new \RuntimeException(
+                'Incident introuvable.'
+            );
+        }
+
+        $currentStatus = (string) ($incident['status'] ?? '');
+
+        if (
+            !in_array(
+                $newStatus,
+                $allowedTransitions[$currentStatus] ?? [],
+                true
+            )
+        ) {
+            throw new \RuntimeException(
+                sprintf(
+                    'Transition impossible : %s → %s.',
+                    $currentStatus ?: 'inconnu',
+                    $newStatus
+                )
+            );
+        }
+
+        $this->incidents->updateOne(
+            ['_id' => $objectId],
             [
                 '$set' => [
-                    'status' => $status,
+                    'status' => $newStatus,
                     'updated_at' => new UTCDateTime(),
                 ],
             ]
         );
-
-        if ($result->getMatchedCount() === 0) {
-            throw new \RuntimeException('Incident introuvable.');
-        }
     }
 
     private function toUtcDateTime(\DateTimeInterface $date): UTCDateTime

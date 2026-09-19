@@ -16,6 +16,32 @@
             <a href="{{ path('app_contact') }}">Contact</a>
         </nav>
 
+        {# Espace employé #}
+        {% if is_granted('ROLE_EMPLOYEE') %}
+                <a
+                    class="site-header__link"
+                    href="{{ path('app_employee_review_index') }}"
+                >
+                    Espace employé
+                </a>
+                
+                <a
+                    class="site-header__link"
+                    href="{{ path('app_employee_review_index') }}"
+                >
+                    Avis à modérer
+                </a>
+
+                <a
+                    class="site-header__link"
+                    href="{{ path('app_employee_incident_index') }}"
+                >
+                    Incidents
+                </a>
+
+
+            {% endif %}
+
         {# Espace utilisateur #}
         <nav class="site-header__nav" aria-label="Compte utilisateur">
             {% if current_user %}

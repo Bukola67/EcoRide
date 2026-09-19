@@ -84,6 +84,7 @@ final class PassengerValidationController extends AbstractController
                     'Oui' => 'yes',
                     'Non' => 'no',
                 ],
+                'data' => $outcome === 'incident' ? 'no' : 'yes',
                 'expanded' => true,
                 'multiple' => false,
                 'required' => true,

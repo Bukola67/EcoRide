@@ -195,10 +195,15 @@ final class CarpoolController extends AbstractController
                 throw $this->createNotFoundException('Covoiturage introuvable.');
             }
 
-            $reviews = $reviewRepository->findBy([
-                'carpool' => $carpool,
-                'status' => 'APPROVED',
-            ]);
+            $reviews = $reviewRepository->findBy(
+                [
+                    'carpool' => $carpool,
+                    'status' => 'APPROVED',
+                ],
+                [
+                    'createdAt' => 'DESC',
+                ]
+            );
 
             /*
             * null : aucune réservation antérieure pour cet utilisateur et ce trajet.

@@ -1,0 +1,222 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Incidents signalés | EcoRide{% endblock %}
+
+{% block body %}
+    <main class="container section">
+
+        <header class="section__header">
+            <p class="eyebrow">Espace employé</p>
+
+            <h1>Incidents signalés</h1>
+
+            <p>
+                Consultez les trajets signalés par les passagers.
+            </p>
+        </header>
+
+        <p class="employee-nav">
+            <a
+                class="btn btn-outline"
+                href="{{ path('app_employee_review_index') }}"
+            >
+                Avis à modérer
+            </a>
+        </p>
+
+        <div class="cards-grid">
+
+            {% for incident in incidents %}
+
+                <article class="card incident-card">
+
+                    {# En-tête de la carte #}
+                    <div class="incident-card__header">
+
+                        {# Titre de l'incident #}
+                        <div class="incident-card__title">
+                            <p class="eyebrow">
+                                Incident #{{ incident._id }}
+                            </p>
+
+                            <h2>
+                                Trajet #{{ incident.carpool_id }}
+                            </h2>
+                        </div>
+
+                        {# Statut #}
+                        <div class="incident-card__status">
+                            {% if incident.status == 'OPEN' %}
+                                <span class="badge badge-warning">
+                                    Ouvert
+                                </span>
+                            {% elseif incident.status == 'IN_PROGRESS' %}
+                                <span class="badge badge-info">
+                                    En cours
+                                </span>
+                            {% elseif incident.status == 'RESOLVED' %}
+                                <span class="badge badge-eco">
+                                    Résolu
+                                </span>
+                            {% endif %}
+                        </div>
+
+                    </div>
+
+                    {# Dates et dernière mise à jour #}
+                    {% if incident.created_at is defined and incident.created_at %}
+
+                        <p class="incident-card__meta">
+                            Signalé le
+                            {{ incident.created_at.toDateTime()|date('d/m/Y à H:i') }}
+
+                            {% if incident.updated_at is defined and incident.updated_at %}
+                                <br>
+                                Dernière mise à jour :
+                                {{ incident.updated_at.toDateTime()|date('d/m/Y à H:i') }}
+                            {% endif %}
+                        </p>
+
+                    {% endif %}
+
+                    {# Actions selon le statut #}
+                    <div class="incident-card__actions">
+
+                        {% if incident.status == 'OPEN' %}
+
+                            <form
+                                method="post"
+                                action="{{ path('app_employee_incident_update_status', {
+                                    id: incident._id
+                                }) }}"
+                                class="form-actions"
+                            >
+                                <input
+                                    type="hidden"
+                                    name="_token"
+                                    value="{{ csrf_token('incident-status-' ~ incident._id) }}"
+                                >
+
+                                <input
+                                    type="hidden"
+                                    name="status"
+                                    value="IN_PROGRESS"
+                                >
+
+                                <button
+                                    class="btn btn-primary"
+                                    type="submit"
+                                >
+                                    Prendre en charge
+                                </button>
+                            </form>
+
+                        {% elseif incident.status == 'IN_PROGRESS' %}
+
+                            <form
+                                method="post"
+                                action="{{ path('app_employee_incident_update_status', {
+                                    id: incident._id
+                                }) }}"
+                                class="form-actions"
+                            >
+                                <input
+                                    type="hidden"
+                                    name="_token"
+                                    value="{{ csrf_token('incident-status-' ~ incident._id) }}"
+                                >
+
+                                <input
+                                    type="hidden"
+                                    name="status"
+                                    value="RESOLVED"
+                                >
+
+                                <button
+                                    class="btn btn-success"
+                                    type="submit"
+                                >
+                                    Marquer comme résolu
+                                </button>
+                            </form>
+
+                        {% endif %}
+
+                    </div>
+
+                    {# Informations sur le trajet et les utilisateurs #}
+                    <dl class="incident-card__details">
+
+                        <div>
+                            <dt>Passager</dt>
+                            <dd>
+                                {{ incident.passenger_username|default('Non renseigné') }}
+                                <br>
+
+                                <a href="mailto:{{ incident.passenger_email|default('') }}">
+                                    {{ incident.passenger_email|default('E-mail non renseigné') }}
+                                </a>
+                            </dd>
+                        </div>
+
+                        <div>
+                            <dt>Chauffeur</dt>
+                            <dd>
+                                {{ incident.driver_username|default('Non renseigné') }}
+                                <br>
+
+                                <a href="mailto:{{ incident.driver_email|default('') }}">
+                                    {{ incident.driver_email|default('E-mail non renseigné') }}
+                                </a>
+                            </dd>
+                        </div>
+
+                        <div>
+                            <dt>Départ</dt>
+                            <dd>
+                                {{ incident.departure }}
+                                <br>
+
+                                {% if incident.departure_at is defined and incident.departure_at %}
+                                    {{ incident.departure_at.toDateTime()|date('d/m/Y à H:i') }}
+                                {% endif %}
+                            </dd>
+                        </div>
+
+                        <div>
+                            <dt>Arrivée</dt>
+                            <dd>
+                                {{ incident.arrival }}
+                                <br>
+
+                                {% if incident.arrival_at is defined and incident.arrival_at %}
+                                    {{ incident.arrival_at.toDateTime()|date('d/m/Y à H:i') }}
+                                {% endif %}
+                            </dd>
+                        </div>
+
+                    </dl>
+
+                    {# Commentaire du passager #}
+                    <div class="alert alert-warning">
+                        <strong>Signalement du passager :</strong>
+
+                        <p>
+                            {{ incident.comment }}
+                        </p>
+                    </div>
+
+                </article>
+
+            {% else %}
+
+                <p class="alert alert-success">
+                    Aucun incident signalé pour le moment.
+                </p>
+
+            {% endfor %}
+
+        </div>
+
+    </main>
+{% endblock %}
