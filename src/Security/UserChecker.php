@@ -19,7 +19,7 @@ class UserChecker implements UserCheckerInterface
         // Utiliser isActive() qui existe déjà dans User
         if (!$user->isActive()) {
             throw new CustomUserMessageAccountStatusException(
-                'Votre compte est suspendu. Contactez l’administrateur.'
+                'Votre compte a été suspendu. Contactez EcoRide pour plus d’informations.'
             );
         }
     }

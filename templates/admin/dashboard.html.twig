@@ -1,0 +1,175 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Administration | EcoRide{% endblock %}
+
+{% block body %}
+    <main class="container section">
+        <header class="section__header">
+            <p class="eyebrow">Administration</p>
+
+            <h1>Tableau de bord</h1>
+
+            <p>
+                Suivez les covoiturages terminés et les crédits gagnés par EcoRide.
+            </p>
+        </header>
+
+        <section class="cards-grid admin-summary">
+            <article class="card">
+                <p class="eyebrow">Total des commissions</p>
+
+                <p class="admin-summary__value">
+                    {{ platformFeesTotal }} crédits
+                </p>
+
+                <p class="admin-summary__label">
+                    Commissions validées sur les trajets confirmés.
+                </p>
+            </article>
+
+            <article class="card">
+                <h2>Gestion des comptes</h2>
+
+                <p>
+                    Créez des comptes employés et gérez l’activation des utilisateurs.
+                </p>
+
+                <div class="form-actions">
+                    <a
+                        class="btn btn-primary"
+                        href="{{ path('app_admin_employee_new') }}"
+                    >
+                        Créer un employé
+                    </a>
+
+                    <a
+                        class="btn btn-outline"
+                        href="{{ path('app_admin_user_index') }}"
+                    >
+                        Gérer les comptes
+                    </a>
+                </div>
+            </article>
+        </section>
+
+        <section class="admin-charts">
+            <article class="admin-chart-panel">
+                <header class="admin-chart-panel__header">
+                    <p class="eyebrow">Activité</p>
+                    <h2>Covoiturages terminés par jour</h2>
+                </header>
+
+                <div class="chart-container">
+                    <canvas id="completed-carpools-chart"></canvas>
+                </div>
+            </article>
+
+            <article class="admin-chart-panel">
+                <header class="admin-chart-panel__header">
+                    <p class="eyebrow">Revenus plateforme</p>
+                    <h2>Crédits gagnés par EcoRide</h2>
+                </header>
+
+                <div class="chart-container">
+                    <canvas id="platform-fees-chart"></canvas>
+                </div>
+            </article>
+        </section>
+        
+    </main>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        document.addEventListener('turbo:load', () => {
+            
+            
+            const completedCarpoolsByDay =
+                {{ completedCarpoolsByDay|json_encode|raw }};
+
+            const platformFeesByDay =
+                {{ platformFeesByDay|json_encode|raw }};
+
+            const completedCanvas = document.getElementById(
+                'completed-carpools-chart'
+            );
+
+            const feesCanvas = document.getElementById(
+                'platform-fees-chart'
+            );
+
+            if (
+                typeof Chart !== 'undefined'
+                && completedCanvas
+            ) {
+                new Chart(completedCanvas, {
+                    type: 'bar',
+                    data: {
+                        labels: completedCarpoolsByDay.map(
+                            (item) => item.day
+                        ),
+                        datasets: [{
+                            label: 'Covoiturages terminés',
+                            data: completedCarpoolsByDay.map(
+                                (item) => Number(item.total)
+                            ),
+                            backgroundColor: '#636B29',
+                            borderRadius: 8,
+                        }],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    precision: 0,
+                                },
+                            },
+                        },
+                    },
+                });
+            }
+
+            if (
+                typeof Chart !== 'undefined'
+                && feesCanvas
+            ) {
+                new Chart(feesCanvas, {
+                    type: 'line',
+                    data: {
+                        labels: platformFeesByDay.map(
+                            (item) => item.day
+                        ),
+                        datasets: [{
+                            label: 'Crédits EcoRide',
+                            data: platformFeesByDay.map(
+                                (item) => Number(item.total)
+                            ),
+                            borderColor: '#4F7D54',
+                            backgroundColor: 'rgb(79 125 84 / 0.16)',
+                            fill: true,
+                            tension: 0.3,
+                        }],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    precision: 0,
+                                },
+                            },
+                        },
+                    },
+                });
+            }
+        });
+    </script>
+{% endblock %}

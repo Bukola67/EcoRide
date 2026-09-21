@@ -178,7 +178,7 @@ class AppFixtures extends Fixture
 
         $carpool2 = new Carpool();
         $carpool2->setDriver($driverPassenger);
-        $carpool2->setVehicle($vehicle3);
+        $carpool2->setVehicle($vehicle4);
         $carpool2->setDepartureCity('Paris');
         $carpool2->setDepartureAddress('Gare de Lyon, 75012 Paris');
         $carpool2->setArrivalCity('Lyon');
@@ -254,6 +254,25 @@ class AppFixtures extends Fixture
         $bordeauxToulouseCarpool->setRemainingSeatCount(3);
         $bordeauxToulouseCarpool->setStatus('PLANNED');
         $bordeauxToulouseCarpool->setCreatedAt(new \DateTimeImmutable());
+
+        // --- Passager sans crédit ---
+        $passengerWithoutCredits = new User();
+        $passengerWithoutCredits->setEmail('sans-credit@example.com');
+        $passengerWithoutCredits->setUsername('SansCredit');
+        $passengerWithoutCredits->setPassword(
+            $this->passwordHasher->hashPassword(
+                $passengerWithoutCredits,
+                'password123'
+            )
+        );
+        $passengerWithoutCredits->setRoles(['ROLE_USER']);
+        $passengerWithoutCredits->setCredits(0);
+        $passengerWithoutCredits->setIsDriver(false);
+        $passengerWithoutCredits->setIsPassenger(true);
+        $passengerWithoutCredits->setIsActive(true);
+        $passengerWithoutCredits->setCreatedAt(new \DateTimeImmutable());
+
+        $manager->persist($passengerWithoutCredits);
 
         $manager->persist($carpool1);
         $manager->persist($carpool2);

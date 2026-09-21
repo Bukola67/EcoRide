@@ -1267,6 +1267,154 @@ textarea:focus {
 }
 
 /* ============================================================
+   ADMINISTRATION
+   ============================================================ */
+
+.admin-summary {
+    margin-bottom: 1.25rem;
+}
+
+.admin-summary__value {
+    margin: 0.25rem 0;
+    color: var(--color-primary);
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 6vw, 3rem);
+    font-weight: 700;
+}
+
+.admin-summary__label {
+    margin-bottom: 0;
+    color: var(--color-muted);
+}
+
+/* ============================================================
+   ADMINISTRATION — GRAPHIQUES
+   ============================================================ */
+
+.admin-charts {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+}
+
+.admin-chart-panel {
+    min-width: 0;
+    padding: 1.5rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.admin-chart-panel__header {
+    margin-bottom: 1.25rem;
+}
+
+.admin-chart-panel__header h2 {
+    margin-bottom: 0;
+    font-size: clamp(1.35rem, 3vw, 2rem);
+}
+
+.chart-container {
+    position: relative;
+    width: 100%;
+    height: 22rem;
+}
+
+.chart-container canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+@media (min-width: 64rem) {
+    .admin-charts {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+/* ============================================================
+   ADMINISTRATION — FORMULAIRE EMPLOYÉ
+   ============================================================ */
+
+.admin-form-card {
+    width: 100%;
+    max-width: 44rem;
+    margin-inline: auto;
+}
+
+.admin-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+/* ============================================================
+   ADMINISTRATION — GESTION DES COMPTES
+   ============================================================ */
+
+.admin-users-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.admin-user-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.admin-user-card__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.admin-user-card__header h2 {
+    margin-bottom: 0.25rem;
+    font-size: 1.35rem;
+}
+
+.admin-user-card__email {
+    margin: 0;
+    color: var(--color-muted);
+    overflow-wrap: anywhere;
+}
+
+.admin-user-card__details {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+    margin: 0;
+}
+
+.admin-user-card__details div {
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.admin-user-card__details dt {
+    color: var(--color-muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.admin-user-card__details dd {
+    margin: 0.2rem 0 0;
+    overflow-wrap: anywhere;
+    font-weight: 600;
+}
+
+@media (min-width: 48rem) {
+    .admin-user-card__details {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+/* ============================================================
    ACCESSIBILITÉ
    ============================================================ */
 
