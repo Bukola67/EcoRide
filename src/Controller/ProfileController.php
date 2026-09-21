@@ -31,6 +31,12 @@ final class ProfileController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
 
+        if (!$user instanceof \App\Entity\User || !$user->isActive()) {
+            throw $this->createAccessDeniedException(
+                'Votre compte est suspendu.'
+            );
+        }
+
         return $this->render('profile/index.html.twig', [
             'user' => $user,
         ]);
@@ -43,6 +49,13 @@ final class ProfileController extends AbstractController
 
         /** @var User $user */
         $user = $this->getUser();
+
+        if (!$user instanceof \App\Entity\User || !$user->isActive()) {
+            throw $this->createAccessDeniedException(
+                'Votre compte est suspendu.'
+            );
+        }
+
 
         $form = $this->createForm(ProfileType::class, $user);
         $form->handleRequest($request);
@@ -75,6 +88,13 @@ final class ProfileController extends AbstractController
 
         /** @var User $user */
         $user = $this->getUser();
+
+        if (!$user instanceof \App\Entity\User || !$user->isActive()) {
+            throw $this->createAccessDeniedException(
+                'Votre compte est suspendu.'
+            );
+        }
+
 
         // CSRF
         $token = $request->headers->get('X-CSRF-Token');

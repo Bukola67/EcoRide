@@ -23,6 +23,12 @@ final class MyTripsTakenController extends AbstractController
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
 
+        if (!$user instanceof \App\Entity\User || !$user->isActive()) {
+            throw $this->createAccessDeniedException(
+                'Votre compte est suspendu.'
+            );
+        }
+
         $bookings = $bookingRepository->findBy(
             ['passenger' => $user],
             ['id' => 'DESC']

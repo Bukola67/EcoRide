@@ -27,6 +27,12 @@ final class MyTripsController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
 
+        if (!$user instanceof \App\Entity\User || !$user->isActive()) {
+            throw $this->createAccessDeniedException(
+                'Votre compte est suspendu.'
+            );
+        }
+
         $carpools = $carpoolRepository->findBy(
             ['driver' => $user],
             ['departureAt' => 'DESC']
@@ -46,6 +52,12 @@ final class MyTripsController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
 
+        if (!$user instanceof \App\Entity\User || !$user->isActive()) {
+            throw $this->createAccessDeniedException(
+                'Votre compte est suspendu.'
+            );
+        }
+      
         $bookings = $bookingRepository->findBy(
             ['passenger' => $user],
             ['id' => 'DESC']
@@ -86,6 +98,13 @@ final class MyTripsController extends AbstractController
 
         /** @var User $user */
         $user = $this->getUser();
+
+        if (!$user instanceof \App\Entity\User || !$user->isActive()) {
+            throw $this->createAccessDeniedException(
+                'Votre compte est suspendu.'
+            );
+        }
+
 
         try {
             $cancellationService->cancelByPassenger($booking, $user);
@@ -132,6 +151,12 @@ final class MyTripsController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
 
+        if (!$user instanceof \App\Entity\User || !$user->isActive()) {
+            throw $this->createAccessDeniedException(
+                'Votre compte est suspendu.'
+            );
+        }
+
         try {
             $cancellationService->cancelByDriver($carpool, $user);
 
@@ -175,6 +200,13 @@ public function startDrivenCarpool(
     /** @var User $user */
     $user = $this->getUser();
 
+     if (!$user instanceof \App\Entity\User || !$user->isActive()) {
+        throw $this->createAccessDeniedException(
+                'Votre compte est suspendu.'
+        );
+     }
+
+
     try {
         $rideLifeCycleService->start($carpool, $user);
         $this->addFlash('success', 'Le covoiturage a démarré.');
@@ -213,6 +245,12 @@ public function startDrivenCarpool(
 
         /** @var User $user */
         $user = $this->getUser();
+
+        if (!$user instanceof \App\Entity\User || !$user->isActive()) {
+            throw $this->createAccessDeniedException(
+                'Votre compte est suspendu.'
+            );
+        }
 
         try {
             $rideLifeCycleService->complete($carpool, $user);

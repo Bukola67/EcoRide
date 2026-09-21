@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\Booking;
+use App\Entity\CreditTransaction;
 use App\Service\IncidentService;
 use App\Repository\BookingRepository;
 use App\Enum\PostRideValidation;
@@ -229,5 +230,19 @@ final class PassengerValidationController extends AbstractController
         $driver->setCredits(
             ($driver->getCredits() ?? 0) + $amountForDriver
         );
+
+        $platformTransaction = new CreditTransaction();
+
+        $platformTransaction->setAmount($platformFee);
+        $platformTransaction->setTransactionType('PLATFORM_FEE');
+        $platformTransaction->setDescription(
+            'Commission EcoRide pour le trajet #' . $carpool->getId()
+        );
+        $platformTransaction->setCreatedAt(new \DateTimeImmutable());
+        $platformTransaction->setUser($driver);
+        $platformTransaction->setCarpool($carpool);
+
+        $this->em->persist($platformTransaction);
+
     }
 }

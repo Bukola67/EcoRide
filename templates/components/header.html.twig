@@ -18,28 +18,30 @@
 
         {# Espace employé #}
         {% if is_granted('ROLE_EMPLOYEE') %}
-                <a
-                    class="site-header__link"
-                    href="{{ path('app_employee_review_index') }}"
-                >
-                    Espace employé
-                </a>
-                
-                <a
-                    class="site-header__link"
-                    href="{{ path('app_employee_review_index') }}"
-                >
-                    Avis à modérer
-                </a>
+            <a
+                class="site-header__link"
+                href="{{ path('app_employee_review_index') }}"
+            >
+                Avis à modérer
+            </a>
 
-                <a
-                    class="site-header__link"
-                    href="{{ path('app_employee_incident_index') }}"
-                >
-                    Incidents
-                </a>
+            <a
+                class="site-header__link"
+                href="{{ path('app_employee_incident_index') }}"
+            >
+                Incidents
+            </a>
+        {% endif %}
 
 
+            {# Espace administrateur #}
+            {% if is_granted('ROLE_ADMIN') %}
+                <a
+                    class="site-header__link"
+                    href="{{ path('app_admin_dashboard') }}"
+                >
+                    Administration
+                </a>
             {% endif %}
 
         {# Espace utilisateur #}

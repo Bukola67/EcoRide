@@ -82,9 +82,9 @@ final class CarpoolController extends AbstractController
             /** @var User $user */
             $user = $this->getUser();
 
-            if (!$user->isActive()) {
+            if (!$user instanceof \App\Entity\User || !$user->isActive()) {
                 throw $this->createAccessDeniedException(
-                    'Votre compte est désactivé.'
+                    'Votre compte est suspendu.'
                 );
             }
 

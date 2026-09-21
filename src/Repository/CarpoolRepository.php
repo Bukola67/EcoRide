@@ -6,6 +6,7 @@ use App\Entity\Carpool;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\DBAL\LockMode;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\ORM\Query;
 
 class CarpoolRepository extends ServiceEntityRepository
@@ -81,5 +82,36 @@ class CarpoolRepository extends ServiceEntityRepository
     public function findForLock(int $id): ?Carpool
     {
         return $this->find($id);
+    }
+
+
+    public function platformFeesTotal(): int
+    {
+        return (int) $this->createQueryBuilder('ct')
+            ->select('COALESCE(SUM(ct.amount), 0)')
+            ->where('ct.transactionType = :type')
+            ->setParameter('type', 'PLATFORM_FEE')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function countCompletedByDay(): array
+    {
+        $connection = $this->getEntityManager()->getConnection();
+
+        return $connection->fetchAllAssociative(
+            <<<SQL
+                SELECT
+                    DATE(departure_at) AS day,
+                    COUNT(id) AS total
+                FROM carpool
+                WHERE status = :status
+                GROUP BY DATE(departure_at)
+                ORDER BY day ASC
+            SQL,
+            [
+                'status' => 'COMPLETED',
+            ]
+        );
     }
 }
