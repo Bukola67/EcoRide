@@ -16,6 +16,42 @@ class CreditTransactionRepository extends ServiceEntityRepository
         parent::__construct($registry, CreditTransaction::class);
     }
 
+    public function platformFeesByDay(): array
+    {
+        $connection = $this->getEntityManager()->getConnection();
+
+        return $connection->fetchAllAssociative(
+            <<<SQL
+                SELECT
+                    DATE(created_at) AS day,
+                    SUM(amount) AS total
+                FROM credit_transaction
+                WHERE transaction_type = :transactionType
+                GROUP BY DATE(created_at)
+                ORDER BY day ASC
+            SQL,
+            [
+                'transactionType' => 'PLATFORM_FEE',
+            ]
+        );
+    }
+
+    public function platformFeesTotal(): int
+    {
+        $connection = $this->getEntityManager()->getConnection();
+
+        return (int) $connection->fetchOne(
+            <<<SQL
+                SELECT COALESCE(SUM(amount), 0)
+                FROM credit_transaction
+                WHERE transaction_type = :transactionType
+            SQL,
+            [
+                'transactionType' => 'PLATFORM_FEE',
+            ]
+        );
+    }
+
     //    /**
     //     * @return CreditTransaction[] Returns an array of CreditTransaction objects
     //     */

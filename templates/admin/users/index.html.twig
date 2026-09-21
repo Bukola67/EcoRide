@@ -1,0 +1,130 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gérer les comptes | EcoRide{% endblock %}
+
+{% block body %}
+    <main class="container section">
+        <header class="section__header">
+            <p class="eyebrow">Administration</p>
+
+            <h1>Gestion des comptes</h1>
+
+            <p>
+                Suspendez ou réactivez les comptes utilisateurs et employés.
+            </p>
+        </header>
+
+        <p class="employee-nav">
+            <a
+                class="btn btn-outline"
+                href="{{ path('app_admin_dashboard') }}"
+            >
+                Retour au tableau de bord
+            </a>
+
+            <a
+                class="btn btn-primary"
+                href="{{ path('app_admin_employee_new') }}"
+            >
+                Créer un employé
+            </a>
+        </p>
+
+        <div class="admin-users-list">
+            {% for user in users %}
+                {% set roles = user.roles %}
+
+                <article class="card admin-user-card">
+                    <div class="admin-user-card__header">
+                        <div>
+                            <h2>{{ user.username }}</h2>
+
+                            <p class="admin-user-card__email">
+                                {{ user.email }}
+                            </p>
+                        </div>
+
+                        {% if user.active %}
+                            <span class="badge badge-eco">
+                                Actif
+                            </span>
+                        {% else %}
+                            <span class="badge badge-warning">
+                                Suspendu
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <dl class="admin-user-card__details">
+                        <div>
+                            <dt>Rôles</dt>
+                            <dd>
+                                {{ roles|join(', ') }}
+                            </dd>
+                        </div>
+
+                        <div>
+                            <dt>Inscription</dt>
+                            <dd>
+                                {{ user.createdAt
+                                    ? user.createdAt|date('d/m/Y à H:i')
+                                    : 'Non renseignée'
+                                }}
+                            </dd>
+                        </div>
+
+                        <div>
+                            <dt>Crédits</dt>
+                            <dd>{{ user.credits }}</dd>
+                        </div>
+                    </dl>
+
+                    {% if 'ROLE_ADMIN' in roles %}
+                        <p class="alert alert-info">
+                            Compte administrateur : sa suspension est protégée.
+                        </p>
+
+                    {% elseif app.user.id == user.id %}
+                        <p class="alert alert-info">
+                            Vous ne pouvez pas modifier votre propre accès.
+                        </p>
+
+                    {% else %}
+                        <form
+                            method="post"
+                            action="{{ path('app_admin_user_toggle_active', {
+                                id: user.id
+                            }) }}"
+                        >
+                            <input
+                                type="hidden"
+                                name="_token"
+                                value="{{ csrf_token('toggle-active-' ~ user.id) }}"
+                            >
+
+                            {% if user.active %}
+                                <button
+                                    class="btn btn-danger"
+                                    type="submit"
+                                >
+                                    Suspendre le compte
+                                </button>
+                            {% else %}
+                                <button
+                                    class="btn btn-success"
+                                    type="submit"
+                                >
+                                    Réactiver le compte
+                                </button>
+                            {% endif %}
+                        </form>
+                    {% endif %}
+                </article>
+            {% else %}
+                <p class="alert alert-info">
+                    Aucun compte utilisateur n’est disponible.
+                </p>
+            {% endfor %}
+        </div>
+    </main>
+{% endblock %}
