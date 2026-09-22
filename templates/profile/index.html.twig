@@ -1,0 +1,90 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon profil | EcoRide{% endblock %}
+
+{% block body %}
+    <main class="container">
+        <header class="section__header">
+            <p class="eyebrow">Espace utilisateur</p>
+            <h1>Mon profil</h1>
+        </header>
+
+        <div class="cards-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+            <article class="card">
+                <h2>Informations</h2>
+                <p>
+                    <strong>Email :</strong> {{ user.email }}<br>
+                    <strong>Nom d’utilisateur :</strong> {{ user.username }}<br>
+                    <strong>Crédits :</strong> {{ user.credits }}<br>
+                    <strong>Statut :</strong>
+                    {{ user.isDriver and user.isPassenger ? 'Passager et chauffeur' : '' }}
+                    {{ user.isDriver and not user.isPassenger ? 'Chauffeur uniquement' : '' }}
+                    {{ not user.isDriver and user.isPassenger ? 'Passager uniquement' : '' }}
+                </p>
+
+                <p>
+                    <a class="btn btn-outline" href="{{ path('app_profile_edit') }}">
+                        Modifier mon profil
+                    </a>
+                </p>
+            </article>
+
+            <article class="card">
+                <h2>Véhicules</h2>
+                {% if user.vehicles|length == 0 %}
+                    <p>Vous n’avez aucun véhicule enregistré.</p>
+                {% else %}
+                    <ul>
+                        {% for vehicle in user.vehicles %}
+                            <li>
+                                {{ vehicle.model }} ({{ vehicle.registrationNumber }})
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                <p>
+                    <a class="btn btn-outline" href="{{ path('app_vehicle_index') }}">
+                        Gérer mes véhicules
+                    </a>
+                </p>
+            </article>
+
+            {% if user.isDriver and user.isActive %}
+                <article class="card">
+                    <h2>Mes trajets</h2>
+                    <p>
+                        Retrouvez les trajets que vous conduisez et ceux auxquels vous participez.
+                    </p>
+
+                    <p>
+                        <a class="btn btn-outline" href="{{ path('app_my_participations') }}">
+                            Mes participations
+                        </a>
+                    </p>
+
+                    <p>
+                        <a class="btn btn-outline" href="{{ path('app_my_taken_carpools') }}">
+                            Mes trajets effectués
+                        </a>
+                     <p>
+
+                     <p>
+                        <a class="btn btn-outline" href="{{ path('app_my_driven_carpools') }}">
+                                Mes covoiturages proposés
+                        </a>
+                    </p>
+
+                     <p>
+                        <a class="btn btn-primary" href="{{ path('app_carpool_new') }}">
+                                Publier un covoiturage
+                        </a>
+                    </p>
+
+
+                    
+                </article>
+            {% endif %}
+        </div>
+    </main>
+{% endblock %}

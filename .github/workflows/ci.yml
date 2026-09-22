@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      APP_ENV: test
+      APP_DEBUG: 1
+      DATABASE_URL: 'mysql://ecoride_user:ecoride_password@127.0.0.1:3306/ecoride?serverVersion=8.0&charset=utf8mb4'
+      MONGODB_URL: 'mongodb://ecoride_mongo:ecoride_mongo_password@127.0.0.1:27017'
+      MONGODB_DB: ecoride
+      MAILER_DSN: 'null://null'
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: ecoride_test
+          MYSQL_USER: ecoride_user
+          MYSQL_PASSWORD: ecoride_password
+          MYSQL_ROOT_PASSWORD: root_password_change_me
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -proot_password_change_me"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+      mongo:
+        image: mongo:7
+        env:
+          MONGO_INITDB_ROOT_USERNAME: ecoride_mongo
+          MONGO_INITDB_ROOT_PASSWORD: ecoride_mongo_password
+        ports:
+          - 27017:27017
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_mysql, intl, mbstring, xml
+          coverage: none
+          tools: composer:v2
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist --optimize-autoloader
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist --optimize-autoloader
+
+      - name: Check MySQL connection
+        run: |
+          mysqladmin ping \
+            -h 127.0.0.1 \
+            -P 3306 \
+            -uroot \
+            -proot_password_change_me \
+            --silent
+
+      - name: Run migrations
+        run: php bin/console doctrine:migrations:migrate --no-interaction --env=test
+
+      - name: Load fixtures
+        run: php bin/console doctrine:fixtures:load --no-interaction --env=test
+
+      - name: Run PHPUnit
+        run: php bin/phpunit

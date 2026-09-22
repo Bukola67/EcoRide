@@ -1,0 +1,60 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Publier un covoiturage | EcoRide{% endblock %}
+
+{% block body %}
+    <section class="section">
+        <div class="container">
+            <header class="section__header">
+                <p class="eyebrow">Espace chauffeur</p>
+                <h1>Publier un covoiturage</h1>
+                <p>
+                    Indiquez les informations du trajet et le véhicule que vous utiliserez.
+                </p>
+            </header>
+
+            {{ form_start(form) }}
+                <div class="cards-grid" style="grid-template-columns: 1fr;">
+                    <article class="card form-card">
+                        <h2>Itinéraire</h2>
+                        {{ form_row(form.departureCity) }}
+                        {{ form_row(form.departureAddress) }}
+                        {{ form_row(form.arrivalCity) }}
+                        {{ form_row(form.arrivalAddress) }}
+
+                        <h2>Horaires et places</h2>
+                        {{ form_row(form.departureAt) }}
+                        {{ form_row(form.arrivalAt) }}
+                        {{ form_row(form.initialSeatCount) }}
+
+                        <h2>Prix et véhicule</h2>
+                        {{ form_row(form.creditCostPerPassenger) }}
+                        {{ form_row(form.vehicle) }}
+
+                        <p>
+                            <a
+                                class="btn btn-outline"
+                                href="{{ path('app_vehicle_new') }}"
+                            >
+                                Ajouter un nouveau véhicule
+                            </a>
+                        </p>
+
+                        <div class="form-actions">
+                            <button class="btn btn-primary" type="submit">
+                                Publier le covoiturage
+                            </button>
+
+                            <a
+                                class="btn btn-outline"
+                                href="{{ path('app_profile') }}"
+                            >
+                                Annuler
+                            </a>
+                        </div>
+                    </article>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </section>
+{% endblock %}

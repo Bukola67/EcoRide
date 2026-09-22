@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter un véhicule | EcoRide{% endblock %}
+
+{% block body %}
+    <main class="container">
+        <header class="section__header">
+            <p class="eyebrow">Espace utilisateur</p>
+            <h1>Ajouter un véhicule</h1>
+        </header>
+
+        {{ form_start(form) }}
+            <div class="cards-grid" style="grid-template-columns: 1fr;">
+                <article class="card">
+                    {{ form_row(form.registrationNumber) }}
+                    {{ form_row(form.firstRegistrationDate) }}
+                    {{ form_row(form.model) }}
+                    {{ form_row(form.color) }}
+                    {{ form_row(form.energyType) }}
+                    {{ form_row(form.seatCount) }}
+
+                    <p>
+                        <button class="btn btn-primary" type="submit">
+                            Enregistrer
+                        </button>
+                        <a class="btn btn-outline" href="{{ path('app_vehicle_index') }}">
+                            Annuler
+                        </a>
+                    </p>
+                </article>
+            </div>
+        {{ form_end(form) }}
+    </main>
+{% endblock %}

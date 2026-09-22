@@ -1,0 +1,96 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Avis à modérer | EcoRide{% endblock %}
+
+{% block body %}
+    <main class="container section">
+        <header class="section__header">
+            <p class="eyebrow">Espace employé</p>
+            <h1>Avis en attente</h1>
+
+            <p>
+                Validez ou refusez les avis laissés par les passagers.
+            </p>
+        </header>
+
+        <div class="cards-grid">
+            {% for review in reviews %}
+                <article class="card">
+                    <p class="eyebrow">
+                        Avis #{{ review.id }}
+                    </p>
+
+                    <h2>
+                        {{ review.carpool.departureCity }}
+                        →
+                        {{ review.carpool.arrivalCity }}
+                    </h2>
+
+                    <p>
+                        <strong>Passager :</strong>
+                        {{ review.passenger.username }}
+                        —
+                        {{ review.passenger.email }}
+                    </p>
+
+                    <p>
+                        <strong>Note :</strong>
+                        {{ review.rating }}/5
+                    </p>
+
+                    {% if review.comment %}
+                        <div class="alert alert-info">
+                            {{ review.comment }}
+                        </div>
+                    {% endif %}
+
+                    <div class="form-actions">
+                        <form
+                            method="post"
+                            action="{{ path('app_employee_review_approve', {
+                                id: review.id
+                            }) }}"
+                        >
+                            <input
+                                type="hidden"
+                                name="_token"
+                                value="{{ csrf_token('review-moderation-' ~ review.id) }}"
+                            >
+
+                            <button
+                                class="btn btn-success"
+                                type="submit"
+                            >
+                                Accepter
+                            </button>
+                        </form>
+
+                        <form
+                            method="post"
+                            action="{{ path('app_employee_review_reject', {
+                                id: review.id
+                            }) }}"
+                        >
+                            <input
+                                type="hidden"
+                                name="_token"
+                                value="{{ csrf_token('review-moderation-' ~ review.id) }}"
+                            >
+
+                            <button
+                                class="btn btn-danger"
+                                type="submit"
+                            >
+                                Refuser
+                            </button>
+                        </form>
+                    </div>
+                </article>
+            {% else %}
+                <p class="alert alert-success">
+                    Aucun avis n’attend de modération.
+                </p>
+            {% endfor %}
+        </div>
+    </main>
+{% endblock %}

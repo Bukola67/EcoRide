@@ -1,0 +1,31 @@
+/* Coolors Exported Palette - https://coolors.co/1c2113-e7d9c7-636b29-364330-888b78 */
+
+- CSV
+
+1C2113,E7D9C7,636B29,364330,888B78
+
+- With #
+
+#1C2113, #E7D9C7, #636B29, #364330, #888B78
+
+- Array
+
+["1C2113","E7D9C7","636B29","364330","888B78"]
+
+- Object
+
+{"Carbon Black":"1C2113","Almond Cream":"E7D9C7","Olive Leaf":"636B29","Charcoal Brown":"364330","Grey Olive":"888B78"}
+
+- Extended Array
+
+[{"name":"Carbon Black","hex":"1C2113","rgb":[28,33,19],"cmyk":[15,0,42,87],"hsb":[81,42,13],"hsl":[81,27,10],"lab":[12,-6,9]},{"name":"Almond Cream","hex":"E7D9C7","rgb":[231,217,199],"cmyk":[0,6,14,9],"hsb":[34,14,91],"hsl":[34,40,84],"lab":[87,2,11]},{"name":"Olive Leaf","hex":"636B29","rgb":[99,107,41],"cmyk":[7,0,62,58],"hsb":[67,62,42],"hsl":[67,45,29],"lab":[43,-13,35]},{"name":"Charcoal Brown","hex":"364330","rgb":[54,67,48],"cmyk":[19,0,28,74],"hsb":[101,28,26],"hsl":[101,17,23],"lab":[27,-10,10]},{"name":"Grey Olive","hex":"888B78","rgb":[136,139,120],"cmyk":[2,0,14,45],"hsb":[69,14,55],"hsl":[69,8,51],"lab":[57,-5,10]}]
+
+- XML
+
+<palette>
+  <color name="Carbon Black" hex="1C2113" r="28" g="33" b="19" />
+  <color name="Almond Cream" hex="E7D9C7" r="231" g="217" b="199" />
+  <color name="Olive Leaf" hex="636B29" r="99" g="107" b="41" />
+  <color name="Charcoal Brown" hex="364330" r="54" g="67" b="48" />
+  <color name="Grey Olive" hex="888B78" r="136" g="139" b="120" />
+</palette>

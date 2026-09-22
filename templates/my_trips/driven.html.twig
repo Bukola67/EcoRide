@@ -1,0 +1,183 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes covoiturages proposés | EcoRide{% endblock %}
+
+{% block body %}
+    <section class="section">
+        <div class="container">
+            <header class="section__header">
+                <p class="eyebrow">Espace chauffeur</p>
+                <h1>Mes covoiturages proposés</h1>
+                <p>
+                    Consultez vos covoiturages publiés, leurs participants
+                    et leur état.
+                </p>
+
+                {% if app.user.isDriver and app.user.isActive %}
+                    <p>
+                        <a class="btn btn-primary" href="{{ path('app_carpool_new') }}">
+                            Publier un covoiturage
+                        </a>
+                    </p>
+                {% endif %}
+            </header>
+
+            {% if carpools is empty %}
+                <div class="alert alert-info">
+                    Vous n’avez encore publié aucun covoiturage.
+                </div>
+            {% else %}
+                <div class="cards-grid">
+                    {% for carpool in carpools %}
+                        <article class="card carpool-card">
+                            <div class="carpool-card__top">
+                                <div>
+                                    <p class="carpool-card__label">
+                                        Trajet n°{{ carpool.id }}
+                                    </p>
+
+                                    <h2>
+                                        {{ carpool.departureCity }}
+                                        →
+                                        {{ carpool.arrivalCity }}
+                                    </h2>
+
+                                    <p class="driver-summary__rating">
+                                        Départ le
+                                        {{ carpool.departureAt|date('d/m/Y à H:i') }}
+                                    </p>
+                                </div>
+
+                                <span class="badge badge-info">
+                                    {{ carpool.status }}
+                                </span>
+                            </div>
+
+                            <dl class="carpool-card__details">
+                                <div>
+                                    <dt>Véhicule</dt>
+                                    <dd>
+                                        {{ carpool.vehicle.model }}
+                                        — {{ carpool.vehicle.registrationNumber }}
+                                    </dd>
+                                </div>
+
+                                <div>
+                                    <dt>Prix</dt>
+                                    <dd>
+                                        {{ carpool.creditCostPerPassenger }} crédits
+                                    </dd>
+                                </div>
+
+                                <div>
+                                    <dt>Places restantes</dt>
+                                    <dd>
+                                        {{ carpool.remainingSeatCount }}
+                                        / {{ carpool.initialSeatCount }}
+                                    </dd>
+                                </div>
+
+                                <div>
+                                    <dt>Participants confirmés</dt>
+                                    <dd>
+                                        {% set confirmedParticipants = 0 %}
+                                        {% for booking in carpool.bookings %}
+                                            {% if booking.status == 'CONFIRMED' %}
+                                                {% set confirmedParticipants = confirmedParticipants + 1 %}
+                                            {% endif %}
+                                        {% endfor %}
+
+                                        {{ confirmedParticipants }}
+                                    </dd>
+                                </div>
+                            </dl>
+
+                            <div>
+                                <p class="carpool-card__label">Passagers</p>
+
+                                {% set hasConfirmedParticipant = false %}
+
+                                {% for booking in carpool.bookings %}
+                                    {% if booking.status == 'CONFIRMED' %}
+                                        {% set hasConfirmedParticipant = true %}
+                                        <p>
+                                            {{ booking.passenger.username }}
+                                            <span class="badge badge-info">
+                                                Confirmée
+                                            </span>
+                                        </p>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if not hasConfirmedParticipant %}
+                                    <p class="driver-summary__rating">
+                                        Aucun participant confirmé pour le moment.
+                                    </p>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-actions">
+                                <a
+                                    class="btn btn-outline"
+                                    href="{{ path('app_carpool_detail', { id: carpool.id }) }}"
+                                >
+                                    Voir le détail
+                                </a>
+                                
+                {% if carpool.status == 'PLANNED' %}
+                    <form
+                        method="post"
+                        action="{{ path('app_carpool_start', { id: carpool.id }) }}"
+                    >
+                        <input
+                            type="hidden"
+                            name="_token"
+                            value="{{ csrf_token('start-carpool' ~ carpool.id) }}"
+                        >
+
+                        <button class="btn btn-success" type="submit">
+                            Démarrer
+                        </button>
+                    </form>
+                {% elseif carpool.status == 'STARTED' %}
+                    <form
+                        method="post"
+                        action="{{ path('app_carpool_complete', { id: carpool.id }) }}"
+                    >
+                        <input
+                            type="hidden"
+                            name="_token"
+                            value="{{ csrf_token('complete-carpool' ~ carpool.id) }}"
+                        >
+
+                        <button class="btn btn-success" type="submit">
+                            Arrivée à destination
+                        </button>
+                    </form>
+                {% endif %}
+
+                {% if carpool.status == 'PLANNED' and carpool.departureAt > date() %}
+                    <form
+                        method="post"
+                        action="{{ path('app_carpool_cancel', { id: carpool.id }) }}"
+                        onsubmit="return confirm('Annuler ce covoiturage ? Tous les passagers seront remboursés.');"
+                    >
+                        <input
+                            type="hidden"
+                            name="_token"
+                            value="{{ csrf_token('cancel-carpool' ~ carpool.id) }}"
+                        >
+
+                        <button class="btn btn-danger" type="submit">
+                            Annuler le covoiturage
+                        </button>
+                    </form>
+                {% endif %}                                
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </section>
+{% endblock %}

@@ -1,0 +1,112 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes participations | EcoRide{% endblock %}
+
+{% block body %}
+    <section class="section">
+        <div class="container">
+            <header class="section__header">
+                <p class="eyebrow">Espace passager</p>
+                <h1>Mes participations</h1>
+                <p>
+                    Retrouvez vos réservations et l’état des covoiturages
+                    auxquels vous participez.
+                </p>
+            </header>
+
+            {% if bookings is empty %}
+                <div class="alert alert-info">
+                    Vous n’avez encore participé à aucun covoiturage.
+                </div>
+            {% else %}
+                <div class="cards-grid">
+                    {% for booking in bookings %}
+                        {% set carpool = booking.carpool %}
+
+                        <article class="card carpool-card">
+                            <div class="carpool-card__top">
+                                <div>
+                                    <p class="carpool-card__label">
+                                        Réservation n°{{ booking.id }}
+                                    </p>
+
+                                    <h2>
+                                        {{ carpool.departureCity }}
+                                        →
+                                        {{ carpool.arrivalCity }}
+                                    </h2>
+
+                                    <p class="driver-summary__rating">
+                                        Départ le
+                                        {{ carpool.departureAt|date('d/m/Y à H:i') }}
+                                    </p>
+                                </div>
+
+                                <span class="badge badge-info">
+                                    {{ booking.status }}
+                                </span>
+                            </div>
+
+                            <dl class="carpool-card__details">
+                                <div>
+                                    <dt>Chauffeur</dt>
+                                    <dd>{{ carpool.driver.username }}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>État du trajet</dt>
+                                    <dd>{{ carpool.status }}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Montant débité</dt>
+                                    <dd>
+                                        {{ carpool.creditCostPerPassenger }} crédits
+                                    </dd>
+                                </div>
+
+                                <div>
+                                    <dt>Places restantes</dt>
+                                    <dd>
+                                        {{ carpool.remainingSeatCount }}
+                                    </dd>
+                                </div>
+                            </dl>
+
+                            <div class="form-actions">
+                                <a
+                                    class="btn btn-outline"
+                                    href="{{ path('app_carpool_detail', { id: carpool.id }) }}"
+                                >
+                                    Voir le détail
+                                </a>
+
+                    {% if booking.status == 'CONFIRMED'
+                        and carpool.status == 'PLANNED'
+                        and carpool.departureAt > date()
+                    %}
+                        <form
+                            method="post"
+                            action="{{ path('app_booking_cancel', { id: booking.id }) }}"
+                            onsubmit="return confirm('Annuler cette participation et demander le remboursement ?');"
+                        >
+                            <input
+                                type="hidden"
+                                name="_token"
+                                value="{{ csrf_token('cancel-booking' ~ booking.id) }}"
+                            >
+
+                            <button class="btn btn-danger" type="submit">
+                                Annuler ma participation
+                            </button>
+                        </form>
+                    {% endif %}
+                                
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </section>
+{% endblock %}

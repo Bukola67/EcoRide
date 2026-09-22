@@ -1,0 +1,95 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Valider le trajet | EcoRide{% endblock %}
+
+{% block body %}
+    <main class="container section">
+        <header class="section__header">
+            <p class="eyebrow">Fin de trajet</p>
+
+            <h1>Votre trajet s’est-il bien passé ?</h1>
+
+            <p class="lead">
+                {{ booking.carpool.departureCity }}
+                →
+                {{ booking.carpool.arrivalCity }}
+                <br>
+                Le {{ booking.carpool.departureAt|date('d/m/Y à H:i') }}
+            </p>
+        </header>
+
+        {% if app.request.query.get('outcome') == 'incident' %}
+            <div class="alert alert-warning">
+                <strong>Votre signalement sera transmis à l’équipe EcoRide.</strong>
+                Décrivez précisément ce qui s’est passé. Le chauffeur ne sera pas
+                crédité avant l’examen de votre dossier.
+            </div>
+        {% endif %}
+
+        <section class="form-card validation-form-card">
+            {{ form_start(form, {
+                attr: {
+                    class: 'validation-form'
+                }
+            }) }}
+
+                <div class="form-group">
+                    {{ form_label(form.ok) }}
+                    {{ form_errors(form.ok) }}
+
+                    <div class="validation-form__choices">
+                        {{ form_widget(form.ok) }}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.rating) }}
+                    {{ form_errors(form.rating) }}
+
+                    {{ form_widget(form.rating, {
+                        attr: {
+                            min: 1,
+                            max: 5,
+                            placeholder: 'Optionnel'
+                        }
+                    }) }}
+
+                    <small class="form-help">
+                        Vous pouvez attribuer une note de 1 à 5.
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.comment) }}
+                    {{ form_errors(form.comment) }}
+
+                    {{ form_widget(form.comment, {
+                        attr: {
+                            rows: 5,
+                            placeholder: 'Partagez votre avis. En cas de problème, décrivez la situation ici.'
+                        }
+                    }) }}
+
+                    <small class="form-help">
+                        En cas de problème, le commentaire doit comporter au moins 10 caractères.
+                    </small>
+                </div>
+
+                <div class="form-actions">
+                    {{ form_widget(form.submit, {
+                        attr: {
+                            class: 'btn btn-primary'
+                        }
+                    }) }}
+
+                    <a
+                        class="btn btn-outline"
+                        href="{{ path('app_my_taken_carpools') }}"
+                    >
+                        Retour à mes trajets
+                    </a>
+                </div>
+            {{ form_end(form) }}
+        </section>
+    </main>
+{% endblock %}

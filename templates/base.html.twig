@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}EcoRide{% endblock %}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    {% block importmap %}
+        {{ importmap('app') }}
+    {% endblock %}
+</head>
+<body>
+    {% set current_user = app.user %}
+
+    {% include 'components/header.html.twig' %}
+
+    {% for message in app.flashes('success') %}
+        <div class="container alert alert-success" role="status">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {% for message in app.flashes('error') %}
+        <div class="container alert alert-danger" role="alert">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+     <main>
+        {% block body %}{% endblock %}
+    </main>
+
+    {% include 'components/footer.html.twig' %}
+
+    {% block javascripts %}{% endblock %}
+</body>
+</html>
