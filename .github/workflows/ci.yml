@@ -16,7 +16,7 @@ jobs:
       APP_ENV: test
       APP_DEBUG: 1
       DATABASE_URL: 'mysql://ecoride_user:ecoride_password@127.0.0.1:3306/ecoride?serverVersion=8.0&charset=utf8mb4'
-      MONGODB_URL: 'mongodb://ecoride_mongo:ecoride_mongo_password@127.0.0.1:27017'
+      MONGODB_URI: 'mongodb://ecoride_mongo:ecoride_mongo_password@127.0.0.1:27017'
       MONGODB_DB: ecoride
       MAILER_DSN: 'null://null'
 
@@ -59,6 +59,18 @@ jobs:
       - name: Install PHP dependencies
         run: composer install --no-interaction --no-progress --prefer-dist --optimize-autoloader --no-scripts
 
+      - name: Create temporary environment file for CI
+        run: |
+          cat > .env <<'EOF'
+          APP_ENV=test
+          APP_DEBUG=1
+          APP_SECRET=ci_test_secret
+          DATABASE_URL="mysql://ecoride_user:ecoride_password@127.0.0.1:3306/ecoride?serverVersion=8.0&charset=utf8mb4"
+          MONGODB_URI="mongodb://ecoride_mongo:ecoride_mongo_password@127.0.0.1:27017"
+          MONGODB_DB=ecoride
+          MAILER_DSN="null://null"
+          EOF
+
       - name: Check MySQL connection
         run: |
           mysqladmin ping \
@@ -70,7 +82,7 @@ jobs:
 
       - name: Clear Symfony test cache
         run: php bin/console cache:clear --env=test --no-warmup     
-             
+
       - name: Run migrations
         run: php bin/console doctrine:migrations:migrate --no-interaction --env=test
 
