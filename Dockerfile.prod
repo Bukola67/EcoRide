@@ -9,8 +9,7 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install intl opcache pdo_mysql zip \
     && pecl install mongodb \
     && docker-php-ext-enable mongodb \
-    && a2dismod mpm_event mpm_worker 2>/dev/null || true \
-    && a2enmod mpm_prefork rewrite \
+    && a2enmod rewrite \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -25,17 +24,27 @@ RUN composer install \
     --no-progress \
     --prefer-dist \
     --optimize-autoloader \
-    --classmap-authoritative \
     --no-scripts
 
 COPY . .
 
 RUN composer dump-autoload \
     --no-dev \
-    --classmap-authoritative \
     --optimize \
+    && rm -f /etc/apache2/mods-enabled/mpm_event.* \
+             /etc/apache2/mods-enabled/mpm_worker.* \
+             /etc/apache2/mods-enabled/mpm_prefork.* \
+    && ln -sf /etc/apache2/mods-available/mpm_prefork.load \
+              /etc/apache2/mods-enabled/mpm_prefork.load \
+    && ln -sf /etc/apache2/mods-available/mpm_prefork.conf \
+              /etc/apache2/mods-enabled/mpm_prefork.conf \
     && sed -ri -e 's!/var/www/html!/var/www/html/public!g' \
-        /etc/apache2/sites-available/000-default.conf \
-        /etc/apache2/apache2.conf \
+              /etc/apache2/sites-available/000-default.conf \
+              /etc/apache2/apache2.conf \
     && mkdir -p var/cache var/log \
     && chown -R www-data:www-data var
+
+COPY docker-entrypoint.sh /usr/local/bin/railway-entrypoint
+RUN chmod +x /usr/local/bin/railway-entrypoint
+
+CMD ["/usr/local/bin/railway-entrypoint"]
