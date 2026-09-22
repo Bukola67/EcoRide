@@ -29,6 +29,8 @@ RUN COMPOSER_ALLOW_SUPERUSER=1 composer install \
 RUN COMPOSER_ALLOW_SUPERUSER=1 composer dump-autoload \
     --no-dev \
     --optimize \
+    && php bin/console importmap:install --env=prod --no-interaction \
+    && php bin/console asset-map:compile --env=prod --no-interaction \
     && rm -f /etc/apache2/mods-enabled/mpm_event.* \
              /etc/apache2/mods-enabled/mpm_worker.* \
              /etc/apache2/mods-enabled/mpm_prefork.* \
