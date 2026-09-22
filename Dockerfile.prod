@@ -16,9 +16,9 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-COPY composer.json composer.lock ./
+COPY . .
 
-RUN composer install \
+RUN COMPOSER_ALLOW_SUPERUSER=1 composer install \
     --no-dev \
     --no-interaction \
     --no-progress \
@@ -26,9 +26,7 @@ RUN composer install \
     --optimize-autoloader \
     --no-scripts
 
-COPY . .
-
-RUN composer dump-autoload \
+RUN COMPOSER_ALLOW_SUPERUSER=1 composer dump-autoload \
     --no-dev \
     --optimize \
     && rm -f /etc/apache2/mods-enabled/mpm_event.* \
