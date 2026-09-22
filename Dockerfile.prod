@@ -9,7 +9,8 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install intl opcache pdo_mysql zip \
     && pecl install mongodb \
     && docker-php-ext-enable mongodb \
-    && a2enmod rewrite \
+    && a2dismod mpm_event mpm_worker 2>/dev/null || true \
+    && a2enmod mpm_prefork rewrite \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -17,7 +18,6 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 
 COPY composer.json composer.lock ./
-COPY . .
 
 RUN composer install \
     --no-dev \
@@ -28,8 +28,14 @@ RUN composer install \
     --classmap-authoritative \
     --no-scripts
 
-RUN sed -ri -e 's!/var/www/html!/var/www/html/public!g' \
-    /etc/apache2/sites-available/000-default.conf \
-    /etc/apache2/apache2.conf \
+COPY . .
+
+RUN composer dump-autoload \
+    --no-dev \
+    --classmap-authoritative \
+    --optimize \
+    && sed -ri -e 's!/var/www/html!/var/www/html/public!g' \
+        /etc/apache2/sites-available/000-default.conf \
+        /etc/apache2/apache2.conf \
     && mkdir -p var/cache var/log \
     && chown -R www-data:www-data var
