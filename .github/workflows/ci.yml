@@ -15,6 +15,9 @@ jobs:
     env:
       APP_ENV: test
       APP_DEBUG: 1
+      APP_SECRET: ci_test_secret
+      KERNEL_CLASS: 'App\Kernel'
+      DEFAULT_URI: 'http://localhost'
       DATABASE_URL: 'mysql://ecoride_user:ecoride_password@127.0.0.1:3306/ecoride?serverVersion=8.0&charset=utf8mb4'
       MONGODB_URI: 'mongodb://ecoride_mongo:ecoride_mongo_password@127.0.0.1:27017'
       MONGODB_DB: ecoride
@@ -64,11 +67,12 @@ jobs:
           cat > .env <<'EOF'
           APP_ENV=test
           APP_DEBUG=1
+          KERNEL_CLASS="App\Kernel"
           APP_SECRET=ci_test_secret
           DEFAULT_URI="http://localhost"
 
           DATABASE_URL="mysql://ecoride_user:ecoride_password@127.0.0.1:3306/ecoride?serverVersion=8.0&charset=utf8mb4"
-          
+
           MONGODB_URI="mongodb://ecoride_mongo:ecoride_mongo_password@127.0.0.1:27017"
           MONGODB_DB=ecoride
           MAILER_DSN="null://null"
