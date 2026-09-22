@@ -50,12 +50,28 @@ jobs:
 
       - name: Wait for MySQL to be ready
         run: |
-          until mysqladmin ping -h 127.0.0.1 -P 3306 -uroot -proot_password_change_me --silent; do
-            echo "Waiting for MySQL..."
-            sleep 2
-          done
+          mysql \
+            -h 127.0.0.1 \
+            -P 3306 \
+            -uroot \
+            -proot_password_change_me \
+            -e "
+              CREATE DATABASE IF NOT EXISTS ecoride_test
+                CHARACTER SET utf8mb4
+                COLLATE utf8mb4_unicode_ci;
 
-      - name: Create and grant access to test database
+              GRANT ALL PRIVILEGES ON ecoride_test.*
+                TO 'ecoride_user'@'%';
+
+              GRANT ALL PRIVILEGES ON ecoride_test.*
+                TO 'ecoride_user'@'localhost';
+
+              FLUSH PRIVILEGES;
+
+              SHOW GRANTS FOR 'ecoride_user'@'%';
+            "
+
+      - name: Create test database and grant access
         run: |
           mysql -h 127.0.0.1 -P 3306 -uroot -proot_password_change_me \
             -e "CREATE DATABASE IF NOT EXISTS ecoride_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
