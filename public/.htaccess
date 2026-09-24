@@ -1,0 +1,9 @@
+# Use the front controller for all requests
+RewriteEngine On
+
+# If the requested filename exists, serve it
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+# Otherwise, forward to index.php
+RewriteRule ^ index.php [L]
