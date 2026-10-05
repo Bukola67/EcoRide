@@ -147,7 +147,7 @@ final class RideLifeCycleService
     private function sendCompletionEmail(User $passenger, Carpool $carpool): void
     {
         $email = (new Email())
-            ->from('no-reply@ecoride.local')
+            ->from('ecoride.studi.project@gmail.com')
             ->to((string) $passenger->getEmail())
             ->subject('Votre covoiturage EcoRide est terminé')
             ->text(sprintf(

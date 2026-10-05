@@ -9,65 +9,88 @@
             >
         </a>
 
-        {# Navigation principale #}
-        <nav class="site-nav" aria-label="Navigation principale">
-            <a href="{{ path('app_home') }}">Accueil</a>
-            <a href="{{ path('app_carpool_index') }}">Covoiturages</a>
-            <a href="{{ path('app_contact') }}">Contact</a>
-        </nav>
+        <div class="site-header__nav-wrapper" data-controller="burger-menu">
 
-        {# Espace employé #}
-        {% if is_granted('ROLE_EMPLOYEE') %}
-            <a
-                class="site-header__link"
-                href="{{ path('app_employee_review_index') }}"
+            <button
+                type="button"
+                class="burger-toggle"
+                data-action="click->burger-menu#toggle"
+                aria-expanded="false"
+                aria-label="Ouvrir le menu"
             >
-                Avis à modérer
-            </a>
+                <span class="burger-toggle__bar"></span>
+                <span class="burger-toggle__bar"></span>
+                <span class="burger-toggle__bar"></span>
+            </button>
 
-            <a
-                class="site-header__link"
-                href="{{ path('app_employee_incident_index') }}"
+            <div
+                class="nav-panel"
+                data-burger-menu-target="panel"
+                data-action="click->burger-menu#close"
             >
-                Incidents
-            </a>
-        {% endif %}
 
+                {# Navigation principale #}
+                <nav class="site-nav" aria-label="Navigation principale">
+                    <a href="{{ path('app_home') }}">Accueil</a>
+                    <a href="{{ path('app_carpool_index') }}">Covoiturages</a>
+                    <a href="{{ path('app_contact') }}">Contact</a>
+                </nav>
 
-            {# Espace administrateur #}
-            {% if is_granted('ROLE_ADMIN') %}
-                <a
-                    class="site-header__link"
-                    href="{{ path('app_admin_dashboard') }}"
-                >
-                    Administration
-                </a>
-            {% endif %}
+                {# Espace employé #}
+                {% if is_granted('ROLE_EMPLOYEE') %}
+                    <a
+                        class="site-header__link"
+                        href="{{ path('app_employee_review_index') }}"
+                    >
+                        Avis à modérer
+                    </a>
 
-        {# Espace utilisateur #}
-        <nav class="site-header__nav" aria-label="Compte utilisateur">
-            {% if current_user %}
-                <a class="site-header__link" href="{{ path('app_profile') }}">
-                    Mon profil
-                </a>
+                    <a
+                        class="site-header__link"
+                        href="{{ path('app_employee_incident_index') }}"
+                    >
+                        Incidents
+                    </a>
+                {% endif %}
 
-                <span class="site-header__credits">
-                    {{ current_user.credits }} crédits
-                </span>
+                {# Espace administrateur #}
+                {% if is_granted('ROLE_ADMIN') %}
+                    <a
+                        class="site-header__link"
+                        href="{{ path('app_admin_dashboard') }}"
+                    >
+                        Administration
+                    </a>
+                {% endif %}
 
-                <a class="site-header__link" href="{{ path('app_logout') }}">
-                    Se déconnecter
-                </a>
-            {% else %}
-                <a class="site-header__link" href="{{ path('app_login') }}">
-                    Se connecter
-                </a>
+                {# Espace utilisateur #}
+                <nav class="site-header__nav" aria-label="Compte utilisateur">
+                    {% if current_user %}
+                        <a class="site-header__link" href="{{ path('app_profile') }}">
+                            Mon profil
+                        </a>
 
-                <a class="btn btn-primary" href="{{ path('app_register') }}">
-                    S’inscrire
-                </a>
-            {% endif %}
-        </nav>
+                        <span class="site-header__credits">
+                            {{ current_user.credits }} crédits
+                        </span>
+
+                        <a class="site-header__link" href="{{ path('app_logout') }}">
+                            Se déconnecter
+                        </a>
+                    {% else %}
+                        <a class="site-header__link" href="{{ path('app_login') }}">
+                            Se connecter
+                        </a>
+
+                        <a class="btn btn-primary" href="{{ path('app_register') }}">
+                            S’inscrire
+                        </a>
+                    {% endif %}
+                </nav>
+
+            </div>
+
+        </div>
 
     </div>
 </header>

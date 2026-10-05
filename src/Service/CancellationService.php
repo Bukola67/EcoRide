@@ -257,7 +257,7 @@ final class CancellationService
     private function sendCancellationEmail(User $passenger, Carpool $carpool): void
     {
         $email = (new Email())
-            ->from('no-reply@ecoride.local')
+            ->from('ecoride.studi.project@gmail.com')
             ->to((string) $passenger->getEmail())
             ->subject('Annulation de votre covoiturage EcoRide')
             ->text(sprintf(

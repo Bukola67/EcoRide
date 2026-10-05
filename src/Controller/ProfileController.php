@@ -125,14 +125,6 @@ final class ProfileController extends AbstractController
             );
         }
 
-        // Suppression de l’ancienne photo
-        if ($user->getProfilePicture()) {
-            $oldPath = $this->profilePicturesDir . '/' . $user->getProfilePicture();
-            if (file_exists($oldPath)) {
-                unlink($oldPath);
-            }
-        }
-
         $newFilename = $this->uploadProfilePicture($photo);
 
         $oldFilename = $user->getProfilePicture();
@@ -153,17 +145,28 @@ final class ProfileController extends AbstractController
         return new JsonResponse([
             'success' => true,
             'filename' => $newFilename,
+            'url' => $request->getBasePath()
+                . '/uploads/profiles/'
+                . rawurlencode($newFilename),
         ]);
     }
 
-    private function uploadProfilePicture(UploadedFile $file): string
-    {
-        $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-        $safeFilename = $this->slugger->slug($originalFilename);
-        $newFilename = $safeFilename . '-' . uniqid('', true) . '.' . $file->guessExtension();
+        private function uploadProfilePicture(UploadedFile $file): string
+        {
+            $originalFilename = pathinfo(
+                $file->getClientOriginalName(),
+                PATHINFO_FILENAME
+            );
 
-        $file->move($this->profilePicturesDir, $newFilename);
+            $safeFilename = $this->slugger->slug($originalFilename);
+            $newFilename = $safeFilename
+                . '-'
+                . uniqid('', true)
+                . '.'
+                . $file->guessExtension();
 
-        return $newFilename;
-    }
+            $file->move($this->profilePicturesDir, $newFilename);
+
+            return $newFilename;
+        }
 }

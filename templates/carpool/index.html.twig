@@ -96,14 +96,11 @@
                                     {% if carpool.driver.profilePicture %}
                                         <img
                                             class="driver-summary__photo"
-                                            src="{{ asset('images/profiles/' ~ carpool.driver.profilePicture) }}"
+                                            src="{{ asset('uploads/profiles/' ~ carpool.driver.profilePicture) }}"
                                             alt="Photo de profil de {{ carpool.driver.username }}"
                                         >
                                     {% else %}
-                                        <div
-                                            class="driver-summary__placeholder"
-                                            aria-hidden="true"
-                                        >
+                                        <div class="driver-summary__placeholder" aria-hidden="true">
                                             {{ carpool.driver.username|first|upper }}
                                         </div>
                                     {% endif %}
